@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <PreferenceCategory android:title="@string/app_settings" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="custom_internal_sd"
+            android:title="@string/custom_internal_sd" />
+
+        <EditTextPreference
+            android:defaultValue="/sdcard"
+            android:key="internal_sd_path"
+            android:summary="@string/enter_internal_sd_path"
+            android:title="@string/internal_sd_path" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="change_download_path"
+            android:title="@string/change_download_path" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="enable_for_all_apps"
+            android:title="@string/enable_for_all_apps" />
+
+        <EditTextPreference
+            android:key="enable_for_apps"
+            android:summary="@string/enter_package_names"
+            android:title="@string/enable_for_apps" />
+        <EditTextPreference
+            android:key="disable_for_apps"
+            android:summary="@string/enter_package_names"
+            android:title="@string/disable_for_apps" />
+    </PreferenceCategory>
+
+</PreferenceScreen>
