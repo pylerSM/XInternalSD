@@ -54,7 +54,8 @@ public class XInternalSD implements IXposedHookZygoteInit {
 										"disable_for_apps", "");
 								if (!mDisabledApps.isEmpty() && mEnabledModule) {
 									mEnabledModule = mDisabledApps
-											.contains(mPackageName) ? false : true;
+											.contains(mPackageName) ? false
+											: true;
 
 								}
 							} else {
@@ -62,7 +63,8 @@ public class XInternalSD implements IXposedHookZygoteInit {
 										"enable_for_apps", "");
 								if (!mEnabledApps.isEmpty() && mEnabledModule) {
 									mEnabledModule = mEnabledApps
-											.contains(mPackageName) ? true : false;
+											.contains(mPackageName) ? true
+											: false;
 
 								}
 							}
@@ -114,7 +116,8 @@ public class XInternalSD implements IXposedHookZygoteInit {
 									if (!mDisabledApps.isEmpty()
 											&& mEnabledModule) {
 										mEnabledModule = mDisabledApps
-												.contains(mPackageName) ? false : true;
+												.contains(mPackageName) ? false
+												: true;
 
 									}
 								} else {
@@ -172,7 +175,8 @@ public class XInternalSD implements IXposedHookZygoteInit {
 										"disable_for_apps", "");
 								if (!mDisabledApps.isEmpty() && mEnabledModule) {
 									mEnabledModule = mDisabledApps
-											.contains(mPackageName) ? false : true;
+											.contains(mPackageName) ? false
+											: true;
 
 								}
 							} else {
@@ -180,7 +184,8 @@ public class XInternalSD implements IXposedHookZygoteInit {
 										"enable_for_apps", "");
 								if (!mEnabledApps.isEmpty() && mEnabledModule) {
 									mEnabledModule = mEnabledApps
-											.contains(mPackageName) ? true : false;
+											.contains(mPackageName) ? true
+											: false;
 
 								}
 							}
@@ -197,37 +202,41 @@ public class XInternalSD implements IXposedHookZygoteInit {
 					}
 
 				});
-	XposedHelpers.findAndHookMethod(Environment.class,
-				"getExternalStoragePublicDirectory", String.class, new XC_MethodHook() {
+		XposedHelpers.findAndHookMethod(Environment.class,
+				"getExternalStoragePublicDirectory", String.class,
+				new XC_MethodHook() {
 					@Override
 					protected void beforeHookedMethod(MethodHookParam param)
 							throws Throwable {
 						mPrefs.reload();
 						String dirType = (String) param.args[0];
-						boolean isDownloadDir = Environment.DIRECTORY_DOWNLOADS.equals(dirType) ? true : false;
+						boolean isDownloadDir = Environment.DIRECTORY_DOWNLOADS
+								.equals(dirType) ? true : false;
 						mEnabledModule = mPrefs.getBoolean(
 								"custom_internal_sd", true);
 						boolean changeDownloadPath = mPrefs.getBoolean(
-								"change_download_path", true); 
+								"change_download_path", true);
 						mEnabledForAllApps = mPrefs.getBoolean(
 								"enable_for_all_apps", true);
 						@SuppressLint("SdCardPath")
 						String internalSD = mPrefs.getString(
 								"internal_sd_path", "/sdcard");
 						mContext = AndroidAppHelper.currentApplication();
-						if (mContext == null || !isDownloadDir || !changeDownloadPath) {
+						if (mContext == null || !isDownloadDir
+								|| !changeDownloadPath) {
 							mEnabledModule = false;
 						} else {
-						    String downloadDir = internalSD + "/Download/";
-						    mDownloadDir = new File(downloadDir);
-						    mPackageName = mContext.getPackageName();
+							String downloadDir = internalSD + "/Download/";
+							mDownloadDir = new File(downloadDir);
+							mPackageName = mContext.getPackageName();
 							if (mEnabledForAllApps) {
 
 								mDisabledApps = mPrefs.getString(
 										"disable_for_apps", "");
 								if (!mDisabledApps.isEmpty() && mEnabledModule) {
 									mEnabledModule = mDisabledApps
-											.contains(mPackageName) ? false : true;
+											.contains(mPackageName) ? false
+											: true;
 
 								}
 							} else {
@@ -235,7 +244,8 @@ public class XInternalSD implements IXposedHookZygoteInit {
 										"enable_for_apps", "");
 								if (!mEnabledApps.isEmpty() && mEnabledModule) {
 									mEnabledModule = mEnabledApps
-											.contains(mPackageName) ? true : false;
+											.contains(mPackageName) ? true
+											: false;
 
 								}
 							}
@@ -252,6 +262,55 @@ public class XInternalSD implements IXposedHookZygoteInit {
 					}
 
 				});
-			
+		Class<?> packageManagerService = XposedHelpers.findClass(
+				"com.android.server.pm.PackageManagerService", null);
+		XposedHelpers.findAndHookMethod(packageManagerService,
+				"readPermission", "org.xmlpull.v1.XmlPullParser",
+				"java.lang.String", new XC_MethodHook() {
+					@Override
+					protected void afterHookedMethod(MethodHookParam param)
+							throws Throwable {
+						mPrefs.reload();
+
+						String permission = (String) param.args[1];
+						boolean sdCardFullAccess = mPrefs.getBoolean(
+								"sdcard_full_access", true);
+						if (sdCardFullAccess
+								&& (permission
+										.equals("android.permission.WRITE_EXTERNAL_STORAGE") || permission
+										.equals("android.permission.ACCESS_ALL_EXTERNAL_STORAGE"))) {
+							Class<?> process = XposedHelpers.findClass(
+									"android.os.Process", null);
+							int gid = (Integer) XposedHelpers.callStaticMethod(
+									process, "getGidForName", "media_rw");
+							Object mSettings = XposedHelpers.getObjectField(
+									param.thisObject, "mSettings");
+							Object mPermissions = XposedHelpers.getObjectField(
+									mSettings, "mPermissions");
+							Object bp = XposedHelpers.callMethod(mPermissions,
+									"get", permission);
+							int[] bpGids = (int[]) XposedHelpers
+									.getObjectField(bp, "gids");
+							XposedHelpers.setObjectField(bp, "gids",
+									appendInt(bpGids, gid));
+						}
+					}
+				});
+	}
+
+	public int[] appendInt(int[] cur, int val) {
+		if (cur == null) {
+			return new int[] { val };
+		}
+		final int N = cur.length;
+		for (int i = 0; i < N; i++) {
+			if (cur[i] == val) {
+				return cur;
+			}
+		}
+		int[] ret = new int[N + 1];
+		System.arraycopy(cur, 0, ret, 0, N);
+		ret[N] = val;
+		return ret;
 	}
 }

@@ -9,6 +9,8 @@
     <string name="enter_package_names">Enter package names separated by comma</string>
     <string name="enable_for_all_apps">Enable for all apps</string>
     <string name="disable_for_apps">Disable for some apps</string>
-    <string name="enter_internal_sd_path">Enter path to internal SD card</string> 
-    <string name="change_download_path">Change path to Download folder</string> 
+    <string name="enter_internal_sd_path">Enter path to internal SD card</string>
+    <string name="change_download_path">Change path to Download folder</string>
+    <string name="sdcard_full_access">Full access to SD Card</string>
+
 </resources>

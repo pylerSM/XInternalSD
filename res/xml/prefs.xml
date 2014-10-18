@@ -30,6 +30,11 @@
             android:key="disable_for_apps"
             android:summary="@string/enter_package_names"
             android:title="@string/disable_for_apps" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="sdcard_full_access"
+            android:title="@string/sdcard_full_access" />
     </PreferenceCategory>
 
 </PreferenceScreen>
