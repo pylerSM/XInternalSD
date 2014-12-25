@@ -13,6 +13,8 @@ import de.robv.android.xposed.XposedHelpers;
 
 public class XInternalSD implements IXposedHookZygoteInit {
 	public XSharedPreferences prefs;
+	public boolean changeDownloadDirPath;
+	public boolean isDownloadDir;
 	public File internalSdPath;
 	public File appFilesPath;
 	public File obbDirPath;
@@ -103,23 +105,20 @@ public class XInternalSD implements IXposedHookZygoteInit {
 			protected void beforeHookedMethod(MethodHookParam param)
 					throws Throwable {
 				prefs.reload();
-				boolean changeDownloadDirPath = prefs.getBoolean(
+				changeDownloadDirPath = prefs.getBoolean(
 						"change_download_path", true);
 				String type = (String) param.args[0];
-				if (Environment.DIRECTORY_DOWNLOADS.equals(type)
-						&& changeDownloadDirPath) {
-					@SuppressLint("SdCardPath")
-					String intSd = prefs.getString("internal_sd_path",
-							"/sdcard");
-					String downloadDir = intSd + "/Download";
-					downloadDirPath = new File(downloadDir);
-				}
+				isDownloadDir = Environment.DIRECTORY_DOWNLOADS.equals(type);
+				String intSd = prefs.getString("internal_sd_path",
+							"");
+				String downloadDir = intSd + "/Download";
+				downloadDirPath = new File(downloadDir);
 			}
 
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				if (isAppEnabled()) {
+				if (isAppEnabled() && isDownloadDir && changeDownloadDirPath) {
 					param.setResult(downloadDirPath);
 				}
 			}
@@ -186,13 +185,12 @@ public class XInternalSD implements IXposedHookZygoteInit {
 		if (enabledForAllApps) {
 			String disabledApps = prefs.getString("disable_for_apps", "");
 			if (!disabledApps.isEmpty()) {
-				isAppEnabled = disabledApps.contains(packageName) ? false
-						: true;
+				isAppEnabled = !disabledApps.contains(packageName);
 			}
 		} else {
 			String enabledApps = prefs.getString("enable_for_apps", "");
 			if (!enabledApps.isEmpty()) {
-				isAppEnabled = enabledApps.contains(packageName) ? true : false;
+				isAppEnabled = enabledApps.contains(packageName);
 			}
 		}
 		return isAppEnabled;

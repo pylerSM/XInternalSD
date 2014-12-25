@@ -1,6 +1,5 @@
 <resources>
 
-    <string name="app_name">XInternalSD</string>
     <string name="app_description">Изменяет путь к внутренней SD карте</string>
     <string name="app_settings">Настройки</string>
     <string name="custom_internal_sd">Изменённый путь к внутренней SD</string>
