@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/app_settings" >
+    <PreferenceCategory
+        android:key="app_settings"
+        android:title="@string/app_settings" >
         <CheckBoxPreference
             android:defaultValue="true"
             android:key="custom_internal_sd"
