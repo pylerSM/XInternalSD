@@ -221,6 +221,9 @@ public class XInternalSD implements IXposedHookZygoteInit {
 		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
 			isUserApp = true;
 		}
+		if ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+			isUserApp = true;
+		}
 		return isUserApp;
 	}
 

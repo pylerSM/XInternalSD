@@ -44,6 +44,17 @@ public class Preferences extends PreferenceActivity {
 		}
 	}
 
+	public boolean isUserApp(ApplicationInfo appInfo) {
+		boolean isUserApp = false;
+		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
+			isUserApp = true;
+		}
+		if ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
+			isUserApp = true;
+		}
+		return isUserApp;
+	}
+
 	public class LoadApps extends AsyncTask<Void, Void, Void> {
 		MultiSelectListPreference enabledApps = (MultiSelectListPreference) findPreference("enable_for_apps");
 		MultiSelectListPreference disabledApps = (MultiSelectListPreference) findPreference("disable_for_apps");
@@ -62,7 +73,7 @@ public class Preferences extends PreferenceActivity {
 			List<ApplicationInfo> packages = pm
 					.getInstalledApplications(PackageManager.GET_META_DATA);
 			for (ApplicationInfo app : packages) {
-				if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
+				if (isUserApp(app)) {
 					apps.add(app.loadLabel(getPackageManager()));
 					packageNames.add(app.packageName);
 				}
