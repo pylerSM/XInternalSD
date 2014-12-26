@@ -24,13 +24,11 @@
             android:key="enable_for_all_apps"
             android:title="@string/enable_for_all_apps" />
 
-        <EditTextPreference
+        <MultiSelectListPreference
             android:key="enable_for_apps"
-            android:summary="@string/enter_package_names"
             android:title="@string/enable_for_apps" />
-        <EditTextPreference
+        <MultiSelectListPreference
             android:key="disable_for_apps"
-            android:summary="@string/enter_package_names"
             android:title="@string/disable_for_apps" />
 
         <CheckBoxPreference

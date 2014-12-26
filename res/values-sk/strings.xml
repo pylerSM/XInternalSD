@@ -2,10 +2,9 @@
 
     <string name="app_description">Zmeniť cestu k internej karte SD</string>
     <string name="app_settings">Nastavenia</string>
-    <string name="custom_internal_sd">Vlastná cesta k internej SD</string>
+    <string name="custom_internal_sd">Vlastná cesta k internej karte SD</string>
     <string name="internal_sd_path">Cesta k internej karte SD</string>
     <string name="enable_for_apps">Povoliť pre niektoré aplikácie</string>
-    <string name="enter_package_names">Zadajte názvy balíkov oddelených čiarkou</string>
     <string name="enable_for_all_apps">Povoliť pre všetky aplikácie</string>
     <string name="disable_for_apps">Zakázať pre niektoré aplikácie</string>
     <string name="enter_internal_sd_path">Zadajte cestu k internej karte SD</string>

@@ -2,14 +2,13 @@
 
     <string name="app_description">Изменяет путь к внутренней SD карте</string>
     <string name="app_settings">Настройки</string>
-    <string name="custom_internal_sd">Изменённый путь к внутренней SD</string>
+    <string name="custom_internal_sd">Изменённый путь к внутренней SD карте</string>
     <string name="internal_sd_path">Путь к внутренней SD карте</string>
     <string name="enable_for_apps">Включить для некоторых приложений</string>
-    <string name="enter_package_names">Введите имена пакетов через запятую</string>
     <string name="enable_for_all_apps">Включить для всех приложений</string>
     <string name="disable_for_apps">Отключить для некоторых приложений</string>
     <string name="enter_internal_sd_path">Введите путь к внутренней SD карте</string>
     <string name="change_download_path">Изменить путь к папке загрузки</string>
-    <string name="sdcard_full_access">Полный доступ к SD-карте</string>
+    <string name="sdcard_full_access">Полный доступ к внешней SD карте</string>
 
 </resources>

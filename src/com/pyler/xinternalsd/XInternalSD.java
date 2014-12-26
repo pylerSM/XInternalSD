@@ -1,6 +1,8 @@
 package com.pyler.xinternalsd;
 
 import java.io.File;
+import java.util.HashSet;
+import java.util.Set;
 
 import android.annotation.SuppressLint;
 import android.app.AndroidAppHelper;
@@ -39,8 +41,7 @@ public class XInternalSD implements IXposedHookZygoteInit {
 			protected void beforeHookedMethod(MethodHookParam param)
 					throws Throwable {
 				prefs.reload();
-				String intSd = prefs.getString("internal_sd_path", "");
-				internalSdPath = new File(intSd);
+				internalSdPath = new File(getInternalSdPath());
 			}
 
 			@Override
@@ -60,8 +61,7 @@ public class XInternalSD implements IXposedHookZygoteInit {
 				prefs.reload();
 				String arg = (String) param.args[0];
 				if (arg == null) {
-					String intSd = prefs.getString("internal_sd_path", "");
-					String appFiles = intSd + "/Android/data/"
+					String appFiles = getInternalSdPath() + "/Android/data/"
 							+ AndroidAppHelper.currentPackageName() + "/files";
 					appFilesPath = new File(appFiles);
 
@@ -83,9 +83,8 @@ public class XInternalSD implements IXposedHookZygoteInit {
 			protected void beforeHookedMethod(MethodHookParam param)
 					throws Throwable {
 				prefs.reload();
-				String intSd = prefs.getString("internal_sd_path", "");
-				String obbDir = intSd + "/Android/obb/"
-						+ AndroidAppHelper.currentPackageName() + "/";
+				String obbDir = getInternalSdPath() + "/Android/obb/"
+						+ AndroidAppHelper.currentPackageName();
 				obbDirPath = new File(obbDir);
 
 			}
@@ -109,9 +108,7 @@ public class XInternalSD implements IXposedHookZygoteInit {
 						"change_download_path", true);
 				String type = (String) param.args[0];
 				isDownloadDir = Environment.DIRECTORY_DOWNLOADS.equals(type);
-				String intSd = prefs.getString("internal_sd_path",
-							"");
-				String downloadDir = intSd + "/Download";
+				String downloadDir = getInternalSdPath() + "/Download";
 				downloadDirPath = new File(downloadDir);
 			}
 
@@ -183,18 +180,28 @@ public class XInternalSD implements IXposedHookZygoteInit {
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
 				true);
 		if (enabledForAllApps) {
-			String disabledApps = prefs.getString("disable_for_apps", "");
+			Set<String> disabledApps = prefs.getStringSet("disable_for_apps",
+					new HashSet<String>());
 			if (!disabledApps.isEmpty()) {
 				isAppEnabled = !disabledApps.contains(packageName);
 			}
 		} else {
-			String enabledApps = prefs.getString("enable_for_apps", "");
+			Set<String> enabledApps = prefs.getStringSet("enable_for_apps",
+					new HashSet<String>());
 			if (!enabledApps.isEmpty()) {
 				isAppEnabled = enabledApps.contains(packageName);
+			} else {
+				isAppEnabled = false;
 			}
 		}
 		return isAppEnabled;
 
+	}
+
+	@SuppressLint("SdCardPath")
+	public String getInternalSdPath() {
+		String intSd = prefs.getString("internal_sd_path", "/sdcard");
+		return intSd;
 	}
 
 	public int[] appendInt(int[] cur, int val) {
