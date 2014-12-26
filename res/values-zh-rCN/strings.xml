@@ -1,6 +1,5 @@
 <resources>
 
-    <string name="app_name" translatable="false">XInternalSD</string>
     <string name="app_description">更改路径为内置储存卡</string>
     <string name="app_settings">设置</string>
     <string name="custom_internal_sd">自定义内置储存卡路径</string>

@@ -7,6 +7,8 @@ import java.util.Set;
 import android.annotation.SuppressLint;
 import android.app.AndroidAppHelper;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Environment;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
@@ -177,6 +179,16 @@ public class XInternalSD implements IXposedHookZygoteInit {
 			return false;
 		}
 		String packageName = AndroidAppHelper.currentPackageName();
+		ApplicationInfo appInfo;
+		try {
+			appInfo = context.getPackageManager().getApplicationInfo(
+					packageName, 0);
+		} catch (NameNotFoundException e) {
+			return false;
+		}
+		if (!isUserApp(appInfo)) {
+			return false;
+		}
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
 				true);
 		if (enabledForAllApps) {
@@ -202,6 +214,14 @@ public class XInternalSD implements IXposedHookZygoteInit {
 	public String getInternalSdPath() {
 		String intSd = prefs.getString("internal_sd_path", "/sdcard");
 		return intSd;
+	}
+
+	public boolean isUserApp(ApplicationInfo appInfo) {
+		boolean isUserApp = false;
+		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
+			isUserApp = true;
+		}
+		return isUserApp;
 	}
 
 	public int[] appendInt(int[] cur, int val) {

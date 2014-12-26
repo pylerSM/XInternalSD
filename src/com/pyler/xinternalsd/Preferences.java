@@ -54,7 +54,6 @@ public class Preferences extends PreferenceActivity {
 		protected void onPreExecute() {
 			enabledApps.setEnabled(false);
 			disabledApps.setEnabled(false);
-
 		}
 
 		@Override
@@ -62,10 +61,11 @@ public class Preferences extends PreferenceActivity {
 			PackageManager pm = getPackageManager();
 			List<ApplicationInfo> packages = pm
 					.getInstalledApplications(PackageManager.GET_META_DATA);
-
-			for (ApplicationInfo packageInfo : packages) {
-				apps.add(packageInfo.loadLabel(getPackageManager()));
-				packageNames.add(packageInfo.packageName);
+			for (ApplicationInfo app : packages) {
+				if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
+					apps.add(app.loadLabel(getPackageManager()));
+					packageNames.add(app.packageName);
+				}
 			}
 			return null;
 		}
