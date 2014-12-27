@@ -18,10 +18,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		IXposedHookLoadPackage {
 	public XSharedPreferences prefs;
 	public String internalSd;
-	public Class<?> contextImpl = XposedHelpers.findClass(
-			"android.app.ContextImpl", null);
-	public Class<?> packageManagerService = XposedHelpers.findClass(
-			"com.android.server.pm.PackageManagerService", null);
 	public XC_MethodHook getExternalStorageDirectoryHook;
 	public XC_MethodHook getExternalFilesDirHook;
 	public XC_MethodHook getObbDirHook;
@@ -128,14 +124,15 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		};
 
 		internalSd = Environment.getExternalStorageDirectory().toString();
-		XposedHelpers.findAndHookMethod(packageManagerService,
+		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+				"com.android.server.pm.PackageManagerService", null),
 				"readPermission", "org.xmlpull.v1.XmlPullParser", String.class,
 				externalSdCardAccessHook);
 	}
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
-		if (!isAppEnabled(lpparam)) {
+		if (!isAppEnabled(lpparam.appInfo)) {
 			return;
 		}
 
@@ -152,24 +149,20 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				getDownloadDirHook);
 	}
 
-	public boolean isAppEnabled(LoadPackageParam lpparam) {
+	public boolean isAppEnabled(ApplicationInfo appInfo) {
 		boolean isAppEnabled = true;
+		prefs.reload();
 		boolean moduleEnabled = prefs.getBoolean("custom_internal_sd", true);
-		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
-				false);
 		if (!moduleEnabled) {
 			return false;
 		}
-		if (lpparam.packageName.equals("android") && includeSystemApps) {
-			return true;
-		}
-		if (lpparam.appInfo == null) {
+		if (appInfo == null) {
 			return false;
 		}
-		if (!isAllowedApp(lpparam.appInfo, includeSystemApps)) {
+		if (!isAllowedApp(appInfo)) {
 			return false;
 		}
-		String packageName = lpparam.appInfo.packageName;
+		String packageName = appInfo.packageName;
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
 				true);
 		if (enabledForAllApps) {
@@ -199,11 +192,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		return customInternalSd;
 	}
 
-	public boolean isAllowedApp(ApplicationInfo appInfo,
-			boolean includeSystemApps) {
+	public boolean isAllowedApp(ApplicationInfo appInfo) {
 		boolean isAllowedApp = false;
-		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1
-				|| includeSystemApps) {
+		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
 			isAllowedApp = true;
 		}
 		if ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {

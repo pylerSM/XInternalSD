@@ -42,20 +42,7 @@ public class Preferences extends Activity {
 			PreferenceCategory appSettings = (PreferenceCategory) findPreference("app_settings");
 			Preference sdCardFullAccess = findPreference("sdcard_full_access");
 			EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sd_path");
-			Preference includeSystemApps = findPreference("include_system_apps");
-
-			includeSystemApps
-					.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-						@Override
-						public boolean onPreferenceChange(
-								Preference preference, Object newValue) {
-							reloadAppsList();
-							return true;
-						}
-					});
-
 			reloadAppsList();
-
 			String extStorage = System.getenv("SECONDARY_STORAGE");
 			if (extStorage != null && !extStorage.isEmpty()) {
 				String externalSd = extStorage.split(":")[0];
@@ -75,10 +62,7 @@ public class Preferences extends Activity {
 
 		public boolean isAllowedApp(ApplicationInfo appInfo) {
 			boolean isAllowedApp = false;
-			boolean includeSystemApps = prefs.getBoolean("include_system_apps",
-					false);
-			if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1
-					|| includeSystemApps) {
+			if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
 				isAllowedApp = true;
 			}
 			if ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
@@ -119,7 +103,6 @@ public class Preferences extends Activity {
 						.size()]);
 				CharSequence[] packageNamesList = packageNames
 						.toArray(new CharSequence[packageNames.size()]);
-
 				enabledApps.setEntries(appsList);
 				enabledApps.setEntryValues(packageNamesList);
 				disabledApps.setEntries(appsList);

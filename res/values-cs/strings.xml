@@ -10,6 +10,5 @@
     <string name="enter_internal_sd_path">Zadejte cestu k interní kartě SD</string>
     <string name="change_download_path">Změnit cestu ke složce Download</string>
     <string name="sdcard_full_access">Plný přístup ke externí kartě SD</string>
-    <string name="include_system_apps">Zahrnout systémové aplikace</string>
 
 </resources>
