@@ -5,24 +5,19 @@ import java.util.HashSet;
 import java.util.Set;
 
 import android.annotation.SuppressLint;
-import android.app.AndroidAppHelper;
-import android.content.Context;
 import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Environment;
+import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedHelpers;
+import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
-public class XInternalSD implements IXposedHookZygoteInit {
+public class XInternalSD implements IXposedHookZygoteInit,
+		IXposedHookLoadPackage {
 	public XSharedPreferences prefs;
-	public boolean changeDownloadDirPath;
-	public boolean isDownloadDir;
-	public File internalSdPath;
-	public File appFilesPath;
-	public File obbDirPath;
-	public File downloadDirPath;
+	public String internalSd;
 	public Class<?> contextImpl = XposedHelpers.findClass(
 			"android.app.ContextImpl", null);
 	public Class<?> packageManagerService = XposedHelpers.findClass(
@@ -40,41 +35,29 @@ public class XInternalSD implements IXposedHookZygoteInit {
 
 		getExternalStorageDirectoryHook = new XC_MethodHook() {
 			@Override
-			protected void beforeHookedMethod(MethodHookParam param)
-					throws Throwable {
-				prefs.reload();
-				internalSdPath = new File(getInternalSdPath());
-			}
-
-			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				if (isAppEnabled()) {
-					param.setResult(internalSdPath);
-				}
+				File path = (File) param.getResult();
+				String customInternalSd = path.toString().replaceFirst(
+						internalSd, getCustomInternalSdPath());
+				File customInternalSdPath = new File(customInternalSd);
+				param.setResult(customInternalSdPath);
 			}
 
 		};
 
 		getExternalFilesDirHook = new XC_MethodHook() {
 			@Override
-			protected void beforeHookedMethod(MethodHookParam param)
-					throws Throwable {
-				prefs.reload();
-				String arg = (String) param.args[0];
-				if (arg == null) {
-					String appFiles = getInternalSdPath() + "/Android/data/"
-							+ AndroidAppHelper.currentPackageName() + "/files";
-					appFilesPath = new File(appFiles);
-
-				}
-			}
-
-			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				if (isAppEnabled()) {
-					param.setResult(appFilesPath);
+				String arg = (String) param.args[0];
+				boolean isAppFilesDir = (arg == null);
+				File path = (File) param.getResult();
+				String appFilesDir = path.toString().replaceFirst(internalSd,
+						getCustomInternalSdPath());
+				File appFilesDirPath = new File(appFilesDir);
+				if (isAppFilesDir) {
+					param.setResult(appFilesDirPath);
 				}
 			}
 
@@ -82,42 +65,32 @@ public class XInternalSD implements IXposedHookZygoteInit {
 
 		getObbDirHook = new XC_MethodHook() {
 			@Override
-			protected void beforeHookedMethod(MethodHookParam param)
-					throws Throwable {
-				prefs.reload();
-				String obbDir = getInternalSdPath() + "/Android/obb/"
-						+ AndroidAppHelper.currentPackageName();
-				obbDirPath = new File(obbDir);
-
-			}
-
-			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				if (isAppEnabled()) {
-					param.setResult(obbDirPath);
-				}
+				File path = (File) param.getResult();
+				String obbDir = path.toString().replaceFirst(internalSd,
+						getCustomInternalSdPath());
+				File obbDirPath = new File(obbDir);
+				param.setResult(obbDirPath);
 			}
 
 		};
 
 		getDownloadDirHook = new XC_MethodHook() {
 			@Override
-			protected void beforeHookedMethod(MethodHookParam param)
-					throws Throwable {
-				prefs.reload();
-				changeDownloadDirPath = prefs.getBoolean(
-						"change_download_path", true);
-				String type = (String) param.args[0];
-				isDownloadDir = Environment.DIRECTORY_DOWNLOADS.equals(type);
-				String downloadDir = getInternalSdPath() + "/Download";
-				downloadDirPath = new File(downloadDir);
-			}
-
-			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				if (isAppEnabled() && isDownloadDir && changeDownloadDirPath) {
+				prefs.reload();
+				boolean changeDownloadDirPath = prefs.getBoolean(
+						"change_download_path", true);
+				String type = (String) param.args[0];
+				boolean isDownloadDir = Environment.DIRECTORY_DOWNLOADS
+						.equals(type);
+				File path = (File) param.getResult();
+				String downloadDir = path.toString().replaceFirst(internalSd,
+						getCustomInternalSdPath());
+				File downloadDirPath = new File(downloadDir);
+				if (isDownloadDir && changeDownloadDirPath) {
 					param.setResult(downloadDirPath);
 				}
 			}
@@ -154,41 +127,49 @@ public class XInternalSD implements IXposedHookZygoteInit {
 			}
 		};
 
-		XposedHelpers.findAndHookMethod(Environment.class,
-				"getExternalStorageDirectory", getExternalStorageDirectoryHook);
-		XposedHelpers.findAndHookMethod(contextImpl, "getExternalFilesDir",
-				String.class, getExternalFilesDirHook);
-		XposedHelpers
-				.findAndHookMethod(contextImpl, "getObbDir", getObbDirHook);
-		XposedHelpers.findAndHookMethod(Environment.class,
-				"getExternalStoragePublicDirectory", String.class,
-				getDownloadDirHook);
+		internalSd = Environment.getExternalStorageDirectory().toString();
 		XposedHelpers.findAndHookMethod(packageManagerService,
 				"readPermission", "org.xmlpull.v1.XmlPullParser", String.class,
 				externalSdCardAccessHook);
 	}
 
-	public boolean isAppEnabled() {
+	@Override
+	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
+		if (!isAppEnabled(lpparam)) {
+			return;
+		}
+
+		XposedHelpers.findAndHookMethod(Environment.class,
+				"getExternalStorageDirectory", getExternalStorageDirectoryHook);
+		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+				"android.app.ContextImpl", lpparam.classLoader),
+				"getExternalFilesDir", String.class, getExternalFilesDirHook);
+		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+				"android.app.ContextImpl", lpparam.classLoader), "getObbDir",
+				getObbDirHook);
+		XposedHelpers.findAndHookMethod(Environment.class,
+				"getExternalStoragePublicDirectory", String.class,
+				getDownloadDirHook);
+	}
+
+	public boolean isAppEnabled(LoadPackageParam lpparam) {
 		boolean isAppEnabled = true;
 		boolean moduleEnabled = prefs.getBoolean("custom_internal_sd", true);
+		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
+				false);
 		if (!moduleEnabled) {
 			return false;
 		}
-		Context context = AndroidAppHelper.currentApplication();
-		if (context == null) {
+		if (lpparam.packageName.equals("android") && includeSystemApps) {
+			return true;
+		}
+		if (lpparam.appInfo == null) {
 			return false;
 		}
-		String packageName = AndroidAppHelper.currentPackageName();
-		ApplicationInfo appInfo;
-		try {
-			appInfo = context.getPackageManager().getApplicationInfo(
-					packageName, 0);
-		} catch (NameNotFoundException e) {
+		if (!isAllowedApp(lpparam.appInfo, includeSystemApps)) {
 			return false;
 		}
-		if (!isUserApp(appInfo)) {
-			return false;
-		}
+		String packageName = lpparam.appInfo.packageName;
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
 				true);
 		if (enabledForAllApps) {
@@ -211,20 +192,24 @@ public class XInternalSD implements IXposedHookZygoteInit {
 	}
 
 	@SuppressLint("SdCardPath")
-	public String getInternalSdPath() {
-		String intSd = prefs.getString("internal_sd_path", "/sdcard");
-		return intSd;
+	public String getCustomInternalSdPath() {
+		prefs.reload();
+		String customInternalSd = prefs
+				.getString("internal_sd_path", "/sdcard");
+		return customInternalSd;
 	}
 
-	public boolean isUserApp(ApplicationInfo appInfo) {
-		boolean isUserApp = false;
-		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
-			isUserApp = true;
+	public boolean isAllowedApp(ApplicationInfo appInfo,
+			boolean includeSystemApps) {
+		boolean isAllowedApp = false;
+		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1
+				|| includeSystemApps) {
+			isAllowedApp = true;
 		}
 		if ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-			isUserApp = true;
+			isAllowedApp = true;
 		}
-		return isUserApp;
+		return isAllowedApp;
 	}
 
 	public int[] appendInt(int[] cur, int val) {

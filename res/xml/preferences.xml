@@ -4,7 +4,7 @@
     <PreferenceCategory
         android:key="app_settings"
         android:title="@string/app_settings" >
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="custom_internal_sd"
             android:title="@string/custom_internal_sd" />
@@ -15,11 +15,11 @@
             android:summary="@string/enter_internal_sd_path"
             android:title="@string/internal_sd_path" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="change_download_path"
             android:title="@string/change_download_path" />
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="enable_for_all_apps"
             android:title="@string/enable_for_all_apps" />
@@ -31,10 +31,14 @@
             android:key="disable_for_apps"
             android:title="@string/disable_for_apps" />
 
-        <CheckBoxPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:key="sdcard_full_access"
             android:title="@string/sdcard_full_access" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="include_system_apps"
+            android:title="@string/include_system_apps" />
     </PreferenceCategory>
 
 </PreferenceScreen>

@@ -10,5 +10,6 @@
     <string name="enter_internal_sd_path">内部ストレージパスを入力してください</string>
     <string name="change_download_path">Downloadフォルダパスの変更</string>
     <string name="sdcard_full_access">外部ストレージへのフルアクセス</string>
+    <string name="include_system_apps">システムアプリを含める</string>
 
 </resources>

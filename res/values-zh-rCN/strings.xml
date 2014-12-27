@@ -10,5 +10,6 @@
     <string name="enter_internal_sd_path">输入内置储存卡的路径</string>
     <string name="change_download_path">更改路径到下载文件夹(Download)</string>
     <string name="sdcard_full_access">对外置储存卡的完整权限</string>
+    <string name="include_system_apps">包括系统应用</string>
 
 </resources>
