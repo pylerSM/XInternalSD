@@ -15,10 +15,10 @@
             android:summary="@string/enter_internal_sd_path"
             android:title="@string/internal_sd_path" />
 
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="change_download_path"
-            android:title="@string/change_download_path" />
+        <MultiSelectListPreference
+            android:key="change_system_dirs_path"
+            android:title="@string/change_system_dirs_path" />
+
         <SwitchPreference
             android:defaultValue="true"
             android:key="enable_for_all_apps"
@@ -35,6 +35,10 @@
             android:defaultValue="true"
             android:key="sdcard_full_access"
             android:title="@string/sdcard_full_access" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="include_system_apps"
+            android:title="@string/include_system_apps" />
     </PreferenceCategory>
 
 </PreferenceScreen>

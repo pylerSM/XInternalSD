@@ -18,10 +18,12 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		IXposedHookLoadPackage {
 	public XSharedPreferences prefs;
 	public String internalSd;
+	public Class<?> packageManagerService = XposedHelpers.findClass(
+			"com.android.server.pm.PackageManagerService", null);
 	public XC_MethodHook getExternalStorageDirectoryHook;
 	public XC_MethodHook getExternalFilesDirHook;
 	public XC_MethodHook getObbDirHook;
-	public XC_MethodHook getDownloadDirHook;
+	public XC_MethodHook getExternalStoragePublicDirectoryHook;
 	public XC_MethodHook externalSdCardAccessHook;
 
 	@Override
@@ -72,22 +74,21 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 		};
 
-		getDownloadDirHook = new XC_MethodHook() {
+		getExternalStoragePublicDirectoryHook = new XC_MethodHook() {
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
 				prefs.reload();
-				boolean changeDownloadDirPath = prefs.getBoolean(
-						"change_download_path", true);
-				String type = (String) param.args[0];
-				boolean isDownloadDir = Environment.DIRECTORY_DOWNLOADS
-						.equals(type);
+				String dirType = (String) param.args[0];
+				Set<String> changeSystemDirsPath = prefs.getStringSet(
+						"change_system_dirs_path", new HashSet<String>());
+				boolean isAllowedDir = changeSystemDirsPath.contains(dirType);
 				File path = (File) param.getResult();
-				String downloadDir = path.toString().replaceFirst(internalSd,
+				String systemDir = path.toString().replaceFirst(internalSd,
 						getCustomInternalSdPath());
-				File downloadDirPath = new File(downloadDir);
-				if (isDownloadDir && changeDownloadDirPath) {
-					param.setResult(downloadDirPath);
+				File systemDirPath = new File(systemDir);
+				if (isAllowedDir) {
+					param.setResult(systemDirPath);
 				}
 			}
 
@@ -124,15 +125,14 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		};
 
 		internalSd = Environment.getExternalStorageDirectory().toString();
-		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
-				"com.android.server.pm.PackageManagerService", null),
+		XposedHelpers.findAndHookMethod(packageManagerService,
 				"readPermission", "org.xmlpull.v1.XmlPullParser", String.class,
 				externalSdCardAccessHook);
 	}
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
-		if (!isAppEnabled(lpparam.appInfo)) {
+		if (!isAppEnabled(lpparam)) {
 			return;
 		}
 
@@ -146,23 +146,25 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				getObbDirHook);
 		XposedHelpers.findAndHookMethod(Environment.class,
 				"getExternalStoragePublicDirectory", String.class,
-				getDownloadDirHook);
+				getExternalStoragePublicDirectoryHook);
 	}
 
-	public boolean isAppEnabled(ApplicationInfo appInfo) {
+	public boolean isAppEnabled(LoadPackageParam lpparam) {
 		boolean isAppEnabled = true;
 		prefs.reload();
 		boolean moduleEnabled = prefs.getBoolean("custom_internal_sd", true);
+		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
+				false);
 		if (!moduleEnabled) {
 			return false;
 		}
-		if (appInfo == null) {
+		if (lpparam.packageName.equals("android") && includeSystemApps) {
+			return true;
+		}
+		if (!isAllowedApp(lpparam.appInfo, includeSystemApps)) {
 			return false;
 		}
-		if (!isAllowedApp(appInfo)) {
-			return false;
-		}
-		String packageName = appInfo.packageName;
+		String packageName = lpparam.appInfo.packageName;
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
 				true);
 		if (enabledForAllApps) {
@@ -192,9 +194,11 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		return customInternalSd;
 	}
 
-	public boolean isAllowedApp(ApplicationInfo appInfo) {
+	public boolean isAllowedApp(ApplicationInfo appInfo,
+			boolean includeSystemApps) {
 		boolean isAllowedApp = false;
-		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
+		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1
+				|| includeSystemApps) {
 			isAllowedApp = true;
 		}
 		if ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {

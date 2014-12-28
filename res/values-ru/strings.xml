@@ -10,5 +10,6 @@
     <string name="enter_internal_sd_path">Введите путь к внутренней SD карте</string>
     <string name="change_download_path">Изменить путь к папке загрузки</string>
     <string name="sdcard_full_access">Полный доступ к внешней SD карте</string>
+    <string name="include_system_apps">Включить системные приложения</string>
 
 </resources>
