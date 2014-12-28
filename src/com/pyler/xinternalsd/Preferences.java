@@ -45,7 +45,7 @@ public class Preferences extends Activity {
 			Preference sdCardFullAccess = findPreference("sdcard_full_access");
 			EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sd_path");
 			Preference includeSystemApps = findPreference("include_system_apps");
-                        includeSystemApps
+			includeSystemApps
 					.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 						@Override
 						public boolean onPreferenceChange(
@@ -57,14 +57,15 @@ public class Preferences extends Activity {
 
 			reloadSystemDirs();
 			reloadAppsList();
-			
+
 			String customInternalSD = prefs.getString("internal_sd_path", "");
 			if (!customInternalSD.isEmpty()) {
 				internalSdPath.setSummary(customInternalSD);
 			}
-			
+
 			String extStorage = System.getenv("SECONDARY_STORAGE");
-			if (extStorage != null && !extStorage.isEmpty() && customInternalSD.isEmpty()) {
+			if (extStorage != null && !extStorage.isEmpty()
+					&& customInternalSD.isEmpty()) {
 				String externalSd = extStorage.split(":")[0];
 				internalSdPath.setSummary(externalSd);
 				internalSdPath.setText(externalSd);
@@ -154,27 +155,36 @@ public class Preferences extends Activity {
 			@Override
 			protected Void doInBackground(Void... arg0) {
 				String space = " ";
-				systemDirNames.add(getString(R.string.alarms) + space + "(Alarms)");
+				systemDirNames.add(getString(R.string.alarms) + space
+						+ "(Alarms)");
 				systemDirs.add(Environment.DIRECTORY_ALARMS);
 				systemDirNames.add(getString(R.string.dcim) + space + "(DCIM)");
 				systemDirs.add(Environment.DIRECTORY_DCIM);
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-					systemDirNames.add(getString(R.string.documents  + space + "(Documents)"));
+					systemDirNames.add(getString(R.string.documents) + space
+							+ "(Documents)");
 					systemDirs.add(Environment.DIRECTORY_DOCUMENTS);
 				}
-				systemDirNames.add(getString(R.string.downloads) + space + "(Downloads)");
+				systemDirNames.add(getString(R.string.downloads) + space
+						+ "(Downloads)");
 				systemDirs.add(Environment.DIRECTORY_DOWNLOADS);
-				systemDirNames.add(getString(R.string.movies) + space + "(Movies)");
+				systemDirNames.add(getString(R.string.movies) + space
+						+ "(Movies)");
 				systemDirs.add(Environment.DIRECTORY_MOVIES);
-				systemDirNames.add(getString(R.string.music) + space + "(Musc)");
+				systemDirNames
+						.add(getString(R.string.music) + space + "(Music)");
 				systemDirs.add(Environment.DIRECTORY_MUSIC);
-				systemDirNames.add(getString(R.string.notifications) + space + "(Notifications)");
+				systemDirNames.add(getString(R.string.notifications) + space
+						+ "(Notifications)");
 				systemDirs.add(Environment.DIRECTORY_NOTIFICATIONS);
-				systemDirNames.add(getString(R.string.pictures) + space + "(Pictures)");
+				systemDirNames.add(getString(R.string.pictures) + space
+						+ "(Pictures)");
 				systemDirs.add(Environment.DIRECTORY_PICTURES);
-				systemDirNames.add(getString(R.string.podcasts) + space + "(Podcasts)");
+				systemDirNames.add(getString(R.string.podcasts) + space
+						+ "(Podcasts)");
 				systemDirs.add(Environment.DIRECTORY_PODCASTS);
-				systemDirNames.add(getString(R.string.ringtones) + space + "(Ringtones)");
+				systemDirNames.add(getString(R.string.ringtones) + space
+						+ "(Ringtones)");
 				systemDirs.add(Environment.DIRECTORY_RINGTONES);
 				return null;
 			}

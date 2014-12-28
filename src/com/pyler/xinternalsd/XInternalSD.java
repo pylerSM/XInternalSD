@@ -161,6 +161,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		if (lpparam.packageName.equals("android") && includeSystemApps) {
 			return true;
 		}
+		if (lpparam.appInfo == null) {
+			return false;
+		}
 		if (!isAllowedApp(lpparam.appInfo, includeSystemApps)) {
 			return false;
 		}
