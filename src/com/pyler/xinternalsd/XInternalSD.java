@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.xmlpull.v1.XmlPullParser;
+
 import android.annotation.SuppressLint;
 import android.content.pm.ApplicationInfo;
 import android.os.Environment;
@@ -126,7 +128,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 		internalSd = Environment.getExternalStorageDirectory().toString();
 		XposedHelpers.findAndHookMethod(packageManagerService,
-				"readPermission", "org.xmlpull.v1.XmlPullParser", String.class,
+				"readPermission", XmlPullParser.class, String.class,
 				externalSdCardAccessHook);
 	}
 
