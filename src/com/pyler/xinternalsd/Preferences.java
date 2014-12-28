@@ -45,8 +45,7 @@ public class Preferences extends Activity {
 			Preference sdCardFullAccess = findPreference("sdcard_full_access");
 			EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sd_path");
 			Preference includeSystemApps = findPreference("include_system_apps");
-
-			includeSystemApps
+                        includeSystemApps
 					.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 						@Override
 						public boolean onPreferenceChange(
@@ -58,9 +57,14 @@ public class Preferences extends Activity {
 
 			reloadSystemDirs();
 			reloadAppsList();
-
+			
+			String customInternalSD = prefs.getString("internal_sd_path", "");
+			if (!customInternalSD.isEmpty()) {
+				internalSdPath.setSummary(customInternalSD);
+			}
+			
 			String extStorage = System.getenv("SECONDARY_STORAGE");
-			if (extStorage != null && !extStorage.isEmpty()) {
+			if (extStorage != null && !extStorage.isEmpty() && customInternalSD.isEmpty()) {
 				String externalSd = extStorage.split(":")[0];
 				internalSdPath.setSummary(externalSd);
 				internalSdPath.setText(externalSd);
