@@ -8,8 +8,18 @@
     <string name="enable_for_all_apps">对所有应用启用</string>
     <string name="disable_for_apps">对某些应用禁用</string>
     <string name="enter_internal_sd_path">输入内置储存卡的路径</string>
-    <string name="change_download_path">更改路径到下载文件夹(Download)</string>
     <string name="sdcard_full_access">对外置储存卡的完整权限</string>
-    <string name="include_system_apps">包括系统应用</string>
+    <string name="include_system_apps">包含系统应用</string>
+    <string name="change_system_dirs_path">更改路径到系统目录</string>
+    <string name="alarms">闹钟</string>
+    <string name="dcim">相机胶卷</string>
+    <string name="documents">文档</string>
+    <string name="downloads">下载</string>
+    <string name="movies">电影</string>
+    <string name="music">音乐</string>
+    <string name="notifications">通知</string>
+    <string name="pictures">图片</string>
+    <string name="podcasts">播客</string>
+    <string name="ringtones">铃声</string>
 
 </resources>
