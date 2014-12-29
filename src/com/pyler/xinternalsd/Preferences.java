@@ -104,6 +104,8 @@ public class Preferences extends Activity {
 			MultiSelectListPreference disabledApps = (MultiSelectListPreference) findPreference("disable_for_apps");
 			List<CharSequence> apps = new ArrayList<CharSequence>();
 			List<CharSequence> packageNames = new ArrayList<CharSequence>();
+			PackageManager pm = context.getPackageManager();
+			List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
 			@Override
 			protected void onPreExecute() {
@@ -113,9 +115,6 @@ public class Preferences extends Activity {
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
-				PackageManager pm = context.getPackageManager();
-				List<ApplicationInfo> packages = pm
-						.getInstalledApplications(PackageManager.GET_META_DATA);
 				for (ApplicationInfo app : packages) {
 					if (isAllowedApp(app)) {
 						apps.add(app.loadLabel(context.getPackageManager()));
@@ -166,7 +165,7 @@ public class Preferences extends Activity {
 					systemDirs.add(Environment.DIRECTORY_DOCUMENTS);
 				}
 				systemDirNames.add(getString(R.string.downloads) + space
-						+ "(Downloads)");
+						+ "(Download)");
 				systemDirs.add(Environment.DIRECTORY_DOWNLOADS);
 				systemDirNames.add(getString(R.string.movies) + space
 						+ "(Movies)");
