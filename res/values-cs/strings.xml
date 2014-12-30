@@ -11,15 +11,5 @@
     <string name="sdcard_full_access">Plný přístup ke externí kartě SD</string>
     <string name="include_system_apps">Zahrnout systémové aplikace</string>
     <string name="change_system_dirs_path">Změnit cestu k systémovým adresářům</string>
-    <string name="alarms">Budíky</string>
-    <string name="dcim">DCIM</string>
-    <string name="documents">Dokumenty</string>
-    <string name="downloads">Stahování</string>
-    <string name="movies">Filmy</string>
-    <string name="music">Hudba</string>
-    <string name="notifications">Oznámení</string>
-    <string name="pictures">Obrázky</string>
-    <string name="podcasts">Podcasty</string>
-    <string name="ringtones">Zvonění</string>
 
 </resources>

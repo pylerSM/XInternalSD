@@ -166,7 +166,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		if (lpparam.appInfo == null) {
 			return false;
 		}
-		if (!isAllowedApp(lpparam.appInfo, includeSystemApps)) {
+		if (!isAllowedApp(lpparam.appInfo)) {
 			return false;
 		}
 		String packageName = lpparam.appInfo.packageName;
@@ -199,15 +199,13 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		return customInternalSd;
 	}
 
-	public boolean isAllowedApp(ApplicationInfo appInfo,
-			boolean includeSystemApps) {
-		boolean isAllowedApp = false;
-		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1
-				|| includeSystemApps) {
-			isAllowedApp = true;
-		}
-		if ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-			isAllowedApp = true;
+	public boolean isAllowedApp(ApplicationInfo appInfo) {
+		boolean isAllowedApp = true;
+		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
+				false);
+		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+				&& !includeSystemApps) {
+			isAllowedApp = false;
 		}
 		return isAllowedApp;
 	}

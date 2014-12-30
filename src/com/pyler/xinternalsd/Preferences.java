@@ -55,7 +55,7 @@ public class Preferences extends Activity {
 						}
 					});
 
-			reloadSystemDirs();
+			reloadSystemDirsList();
 			reloadAppsList();
 
 			String customInternalSD = prefs.getString("internal_sd_path", "");
@@ -81,20 +81,17 @@ public class Preferences extends Activity {
 			new LoadApps().execute();
 		}
 
-		public void reloadSystemDirs() {
+		public void reloadSystemDirsList() {
 			new LoadSystemDirs().execute();
 		}
 
 		public boolean isAllowedApp(ApplicationInfo appInfo) {
-			boolean isAllowedApp = false;
+			boolean isAllowedApp = true;
 			boolean includeSystemApps = prefs.getBoolean("include_system_apps",
 					false);
-			if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1
-					|| includeSystemApps) {
-				isAllowedApp = true;
-			}
-			if ((appInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0) {
-				isAllowedApp = true;
+			if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+					&& !includeSystemApps) {
+				isAllowedApp = false;
 			}
 			return isAllowedApp;
 		}
@@ -105,7 +102,8 @@ public class Preferences extends Activity {
 			List<CharSequence> apps = new ArrayList<CharSequence>();
 			List<CharSequence> packageNames = new ArrayList<CharSequence>();
 			PackageManager pm = context.getPackageManager();
-			List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+			List<ApplicationInfo> packages = pm
+					.getInstalledApplications(PackageManager.GET_META_DATA);
 
 			@Override
 			protected void onPreExecute() {
@@ -153,37 +151,27 @@ public class Preferences extends Activity {
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
-				String space = " ";
-				systemDirNames.add(getString(R.string.alarms) + space
-						+ "(Alarms)");
+				systemDirNames.add("Alarms");
 				systemDirs.add(Environment.DIRECTORY_ALARMS);
-				systemDirNames.add(getString(R.string.dcim) + space + "(DCIM)");
+				systemDirNames.add("DCIM");
 				systemDirs.add(Environment.DIRECTORY_DCIM);
 				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-					systemDirNames.add(getString(R.string.documents) + space
-							+ "(Documents)");
+					systemDirNames.add("Documents");
 					systemDirs.add(Environment.DIRECTORY_DOCUMENTS);
 				}
-				systemDirNames.add(getString(R.string.downloads) + space
-						+ "(Download)");
+				systemDirNames.add("Download");
 				systemDirs.add(Environment.DIRECTORY_DOWNLOADS);
-				systemDirNames.add(getString(R.string.movies) + space
-						+ "(Movies)");
+				systemDirNames.add("Movies");
 				systemDirs.add(Environment.DIRECTORY_MOVIES);
-				systemDirNames
-						.add(getString(R.string.music) + space + "(Music)");
+				systemDirNames.add("Music");
 				systemDirs.add(Environment.DIRECTORY_MUSIC);
-				systemDirNames.add(getString(R.string.notifications) + space
-						+ "(Notifications)");
+				systemDirNames.add("Notifications");
 				systemDirs.add(Environment.DIRECTORY_NOTIFICATIONS);
-				systemDirNames.add(getString(R.string.pictures) + space
-						+ "(Pictures)");
+				systemDirNames.add("Pictures");
 				systemDirs.add(Environment.DIRECTORY_PICTURES);
-				systemDirNames.add(getString(R.string.podcasts) + space
-						+ "(Podcasts)");
+				systemDirNames.add("Podcasts");
 				systemDirs.add(Environment.DIRECTORY_PODCASTS);
-				systemDirNames.add(getString(R.string.ringtones) + space
-						+ "(Ringtones)");
+				systemDirNames.add("Ringtones");
 				systemDirs.add(Environment.DIRECTORY_RINGTONES);
 				return null;
 			}

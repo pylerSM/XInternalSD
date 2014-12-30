@@ -32,13 +32,13 @@
             android:title="@string/disable_for_apps" />
 
         <SwitchPreference
-            android:defaultValue="true"
-            android:key="sdcard_full_access"
-            android:title="@string/sdcard_full_access" />
-        <SwitchPreference
             android:defaultValue="false"
             android:key="include_system_apps"
             android:title="@string/include_system_apps" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="sdcard_full_access"
+            android:title="@string/sdcard_full_access" />
     </PreferenceCategory>
 
 </PreferenceScreen>

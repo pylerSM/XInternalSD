@@ -12,15 +12,5 @@
     <string name="sdcard_full_access">Полный доступ к внешней SD карте</string>
     <string name="include_system_apps">Включить системные приложения</string>
     <string name="change_system_dirs_path">Изменить путь к системным каталогам</string>
-    <string name="alarms">Alarms</string>
-    <string name="dcim">DCIM</string>
-    <string name="documents">Documents</string>
-    <string name="downloads">Downloads</string>
-    <string name="movies">Movies</string>
-    <string name="music">Music</string>
-    <string name="notifications">Notifications</string>
-    <string name="pictures">Pictures</string>
-    <string name="podcasts">Podcasts</string>
-    <string name="ringtones">Ringtones</string>
     
 </resources>
