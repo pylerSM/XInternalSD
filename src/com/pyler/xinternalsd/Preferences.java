@@ -2,6 +2,8 @@ package com.pyler.xinternalsd;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collections;
+import java.util.Comparator;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -113,12 +115,26 @@ public class Preferences extends Activity {
 
 			@Override
 			protected Void doInBackground(Void... arg0) {
+				List<String[]> applist = new ArrayList<String[]>();
+
 				for (ApplicationInfo app : packages) {
 					if (isAllowedApp(app)) {
-						apps.add(app.loadLabel(context.getPackageManager()));
-						packageNames.add(app.packageName);
+						applist.add(new String[] {app.packageName, app.loadLabel(context.getPackageManager()).toString()});
 					}
 				}
+
+				Collections.sort(applist, new Comparator<String[]>() {
+					@Override
+					public int compare(String[] entry1, String[] entry2) {
+						return entry1[1].compareToIgnoreCase(entry2[1]);
+					}
+				});
+
+				for (int i = 0; i < applist.size(); i++) {
+					packageNames.add(applist.get(i)[0]);
+					apps.add(applist.get(i)[1]);
+				}
+
 				return null;
 			}
 
