@@ -10,7 +10,6 @@
             android:title="@string/custom_internal_sd" />
 
         <EditTextPreference
-            android:defaultValue="/sdcard"
             android:key="internal_sd_path"
             android:summary="@string/enter_internal_sd_path"
             android:title="@string/internal_sd_path" />
@@ -20,7 +19,7 @@
             android:title="@string/change_system_dirs_path" />
 
         <SwitchPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:key="enable_for_all_apps"
             android:title="@string/enable_for_all_apps" />
 

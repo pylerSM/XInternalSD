@@ -39,7 +39,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				File path = (File) param.getResult();
 				String customInternalSd = path.toString().replaceFirst(
-						internalSd, getCustomInternalSdPath());
+						getInternalSd(), getCustomInternalSd());
 				File customInternalSdPath = new File(customInternalSd);
 				param.setResult(customInternalSdPath);
 			}
@@ -53,8 +53,8 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				String arg = (String) param.args[0];
 				boolean isAppFilesDir = (arg == null);
 				File path = (File) param.getResult();
-				String appFilesDir = path.toString().replaceFirst(internalSd,
-						getCustomInternalSdPath());
+				String appFilesDir = path.toString().replaceFirst(
+						getInternalSd(), getCustomInternalSd());
 				File appFilesDirPath = new File(appFilesDir);
 				if (isAppFilesDir) {
 					param.setResult(appFilesDirPath);
@@ -68,8 +68,8 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
 				File path = (File) param.getResult();
-				String obbDir = path.toString().replaceFirst(internalSd,
-						getCustomInternalSdPath());
+				String obbDir = path.toString().replaceFirst(getInternalSd(),
+						getCustomInternalSd());
 				File obbDirPath = new File(obbDir);
 				param.setResult(obbDirPath);
 			}
@@ -86,8 +86,8 @@ public class XInternalSD implements IXposedHookZygoteInit,
 						"change_system_dirs_path", new HashSet<String>());
 				boolean isAllowedDir = changeSystemDirsPath.contains(dirType);
 				File path = (File) param.getResult();
-				String systemDir = path.toString().replaceFirst(internalSd,
-						getCustomInternalSdPath());
+				String systemDir = path.toString().replaceFirst(
+						getInternalSd(), getCustomInternalSd());
 				File systemDirPath = new File(systemDir);
 				if (isAllowedDir) {
 					param.setResult(systemDirPath);
@@ -126,7 +126,12 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		};
 
-		internalSd = Environment.getExternalStorageDirectory().toString();
+		try {
+			File internalSdPath = Environment.getExternalStorageDirectory();
+			internalSd = internalSdPath.getPath();
+		} catch (Exception e) {
+		}
+
 		XposedHelpers.findAndHookMethod(packageManagerService,
 				"readPermission", XmlPullParser.class, String.class,
 				externalSdCardAccessHook);
@@ -134,8 +139,12 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
-		if (!isAppEnabled(lpparam)) {
+		if (!isEnabledApp(lpparam)) {
 			return;
+		}
+
+		if (internalSd == null) {
+			internalSd = Environment.getExternalStorageDirectory().getPath();
 		}
 
 		XposedHelpers.findAndHookMethod(Environment.class,
@@ -151,8 +160,8 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				getExternalStoragePublicDirectoryHook);
 	}
 
-	public boolean isAppEnabled(LoadPackageParam lpparam) {
-		boolean isAppEnabled = true;
+	public boolean isEnabledApp(LoadPackageParam lpparam) {
+		boolean isEnabledApp = true;
 		prefs.reload();
 		boolean moduleEnabled = prefs.getBoolean("custom_internal_sd", true);
 		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
@@ -171,32 +180,36 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		}
 		String packageName = lpparam.appInfo.packageName;
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
-				true);
+				false);
 		if (enabledForAllApps) {
 			Set<String> disabledApps = prefs.getStringSet("disable_for_apps",
 					new HashSet<String>());
 			if (!disabledApps.isEmpty()) {
-				isAppEnabled = !disabledApps.contains(packageName);
+				isEnabledApp = !disabledApps.contains(packageName);
 			}
 		} else {
 			Set<String> enabledApps = prefs.getStringSet("enable_for_apps",
 					new HashSet<String>());
 			if (!enabledApps.isEmpty()) {
-				isAppEnabled = enabledApps.contains(packageName);
+				isEnabledApp = enabledApps.contains(packageName);
 			} else {
-				isAppEnabled = false;
+				isEnabledApp = !isEnabledApp;
 			}
 		}
-		return isAppEnabled;
+		return isEnabledApp;
 
 	}
 
 	@SuppressLint("SdCardPath")
-	public String getCustomInternalSdPath() {
+	public String getCustomInternalSd() {
 		prefs.reload();
 		String customInternalSd = prefs
 				.getString("internal_sd_path", "/sdcard");
 		return customInternalSd;
+	}
+
+	public String getInternalSd() {
+		return internalSd;
 	}
 
 	public boolean isAllowedApp(ApplicationInfo appInfo) {
