@@ -3,13 +3,13 @@
     <string name="app_description">内部ストレージのパスを変更します</string>
     <string name="app_settings">設定</string>
     <string name="custom_internal_sd">内部ストレージパスの変更</string>
-    <string name="internal_sd_path">内部ストレージのパス</string>
+    <string name="internal_sd_path">変更後の内部ストレージパス</string>
     <string name="enable_for_apps">有効にするアプリの指定</string>
     <string name="enable_for_all_apps">全てのアプリで有効化</string>
     <string name="disable_for_apps">無効にするアプリの指定</string>
     <string name="enter_internal_sd_path">内部ストレージパスを入力してください</string>
     <string name="sdcard_full_access">外部ストレージへのフルアクセス</string>
     <string name="include_system_apps">システムアプリを含める</string>
-    <string name="change_system_dirs_path">システムディレクトリに変更しますパス</string>
+    <string name="change_system_dirs_path">変更するシステムディレクトリパス</string>
 
 </resources>
