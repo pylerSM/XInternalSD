@@ -123,7 +123,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		};
 
-		String internalSd = Environment.getExternalStorageDirectory().getPath();
+		internalSd = Environment.getExternalStorageDirectory().getPath();
 		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
 				"com.android.server.pm.PackageManagerService", null),
 				"readPermission", XmlPullParser.class, String.class,
