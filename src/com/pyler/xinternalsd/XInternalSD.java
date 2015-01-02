@@ -123,11 +123,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		};
 
-		File internalSdPath = Environment.getExternalStorageDirectory();
-		if (internalSdPath != null) {
-			internalSd = internalSdPath.getPath();
-		}
-
+		String internalSd = Environment.getExternalStorageDirectory().getPath();
 		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
 				"com.android.server.pm.PackageManagerService", null),
 				"readPermission", XmlPullParser.class, String.class,
@@ -138,10 +134,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
 		if (!isEnabledApp(lpparam)) {
 			return;
-		}
-
-		if (internalSd == null) {
-			internalSd = Environment.getExternalStorageDirectory().getPath();
 		}
 
 		XposedHelpers.findAndHookMethod(Environment.class,
