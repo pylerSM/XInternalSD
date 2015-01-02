@@ -6,7 +6,6 @@ import java.util.Set;
 
 import org.xmlpull.v1.XmlPullParser;
 
-import android.annotation.SuppressLint;
 import android.content.pm.ApplicationInfo;
 import android.os.Environment;
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -20,8 +19,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		IXposedHookLoadPackage {
 	public XSharedPreferences prefs;
 	public String internalSd;
-	public Class<?> packageManagerService = XposedHelpers.findClass(
-			"com.android.server.pm.PackageManagerService", null);
 	public XC_MethodHook getExternalStorageDirectoryHook;
 	public XC_MethodHook getExternalFilesDirHook;
 	public XC_MethodHook getObbDirHook;
@@ -126,13 +123,13 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		};
 
-		try {
-			File internalSdPath = Environment.getExternalStorageDirectory();
+		File internalSdPath = Environment.getExternalStorageDirectory();
+		if (internalSdPath != null) {
 			internalSd = internalSdPath.getPath();
-		} catch (Exception e) {
 		}
 
-		XposedHelpers.findAndHookMethod(packageManagerService,
+		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+				"com.android.server.pm.PackageManagerService", null),
 				"readPermission", XmlPullParser.class, String.class,
 				externalSdCardAccessHook);
 	}
@@ -163,13 +160,13 @@ public class XInternalSD implements IXposedHookZygoteInit,
 	public boolean isEnabledApp(LoadPackageParam lpparam) {
 		boolean isEnabledApp = true;
 		prefs.reload();
-		boolean moduleEnabled = prefs.getBoolean("custom_internal_sd", true);
+		boolean enabledModule = prefs.getBoolean("custom_internal_sd", true);
 		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
 				false);
-		if (!moduleEnabled) {
+		if (!enabledModule) {
 			return false;
 		}
-		if (lpparam.packageName.equals("android") && includeSystemApps) {
+		if ("android".equals(lpparam.packageName) && includeSystemApps) {
 			return true;
 		}
 		if (lpparam.appInfo == null) {
@@ -200,11 +197,10 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 	}
 
-	@SuppressLint("SdCardPath")
 	public String getCustomInternalSd() {
 		prefs.reload();
-		String customInternalSd = prefs
-				.getString("internal_sd_path", "/sdcard");
+		String customInternalSd = prefs.getString("internal_sd_path",
+				getInternalSd());
 		return customInternalSd;
 	}
 
