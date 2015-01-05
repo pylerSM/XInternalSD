@@ -11,6 +11,5 @@
     <string name="enter_internal_sd_path">Enter path to internal SD card</string>
     <string name="sdcard_full_access">Full access to external SD card</string>
     <string name="include_system_apps">Include system apps</string>
-    <string name="change_system_dirs_path">Change path to system directories</string>
 
 </resources>

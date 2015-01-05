@@ -8,9 +8,7 @@
     <string name="enable_for_all_apps">Включить для всех приложений</string>
     <string name="disable_for_apps">Отключить для некоторых приложений</string>
     <string name="enter_internal_sd_path">Введите путь к внутренней SD карте</string>
-    <string name="change_download_path">Изменить путь к папке загрузки</string>
     <string name="sdcard_full_access">Полный доступ к внешней SD карте</string>
     <string name="include_system_apps">Включить системные приложения</string>
-    <string name="change_system_dirs_path">Изменить путь к системным каталогам</string>
-    
+
 </resources>

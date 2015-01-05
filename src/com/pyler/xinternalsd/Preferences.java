@@ -1,11 +1,10 @@
 package com.pyler.xinternalsd;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -14,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.preference.EditTextPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
@@ -57,7 +55,6 @@ public class Preferences extends Activity {
 						}
 					});
 
-			reloadSystemDirsList();
 			reloadAppsList();
 
 			String customInternalSD = prefs.getString("internal_sd_path", "");
@@ -81,10 +78,6 @@ public class Preferences extends Activity {
 
 		public void reloadAppsList() {
 			new LoadApps().execute();
-		}
-
-		public void reloadSystemDirsList() {
-			new LoadSystemDirs().execute();
 		}
 
 		public boolean isAllowedApp(ApplicationInfo appInfo) {
@@ -154,57 +147,6 @@ public class Preferences extends Activity {
 				disabledApps.setEntryValues(packageNamesList);
 				enabledApps.setEnabled(true);
 				disabledApps.setEnabled(true);
-			}
-		}
-
-		@SuppressLint("NewApi")
-		public class LoadSystemDirs extends AsyncTask<Void, Void, Void> {
-			MultiSelectListPreference changeSystemDirsPath = (MultiSelectListPreference) findPreference("change_system_dirs_path");
-			List<CharSequence> systemDirNames = new ArrayList<CharSequence>();
-			List<CharSequence> systemDirs = new ArrayList<CharSequence>();
-
-			@Override
-			protected void onPreExecute() {
-				changeSystemDirsPath.setEnabled(false);
-			}
-
-			@Override
-			protected Void doInBackground(Void... arg0) {
-				systemDirNames.add("Alarms");
-				systemDirs.add(Environment.DIRECTORY_ALARMS);
-				systemDirNames.add("DCIM");
-				systemDirs.add(Environment.DIRECTORY_DCIM);
-				if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-					systemDirNames.add("Documents");
-					systemDirs.add(Environment.DIRECTORY_DOCUMENTS);
-				}
-				systemDirNames.add("Download");
-				systemDirs.add(Environment.DIRECTORY_DOWNLOADS);
-				systemDirNames.add("Movies");
-				systemDirs.add(Environment.DIRECTORY_MOVIES);
-				systemDirNames.add("Music");
-				systemDirs.add(Environment.DIRECTORY_MUSIC);
-				systemDirNames.add("Notifications");
-				systemDirs.add(Environment.DIRECTORY_NOTIFICATIONS);
-				systemDirNames.add("Pictures");
-				systemDirs.add(Environment.DIRECTORY_PICTURES);
-				systemDirNames.add("Podcasts");
-				systemDirs.add(Environment.DIRECTORY_PODCASTS);
-				systemDirNames.add("Ringtones");
-				systemDirs.add(Environment.DIRECTORY_RINGTONES);
-				return null;
-			}
-
-			@Override
-			protected void onPostExecute(Void result) {
-				CharSequence[] systemDirNamesList = systemDirNames
-						.toArray(new CharSequence[systemDirNames.size()]);
-				CharSequence[] systemDirsList = systemDirs
-						.toArray(new CharSequence[systemDirs.size()]);
-
-				changeSystemDirsPath.setEntries(systemDirNamesList);
-				changeSystemDirsPath.setEntryValues(systemDirsList);
-				changeSystemDirsPath.setEnabled(true);
 			}
 		}
 

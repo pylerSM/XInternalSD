@@ -11,6 +11,7 @@ import android.os.Environment;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
+import de.robv.android.xposed.XC_MethodHook.MethodHookParam;
 import de.robv.android.xposed.XSharedPreferences;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
@@ -34,11 +35,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				File path = (File) param.getResult();
-				String customInternalSd = path.toString().replaceFirst(
-						getInternalSd(), getCustomInternalSd());
-				File customInternalSdPath = new File(customInternalSd);
-				param.setResult(customInternalSdPath);
+				changeDirPath(param);
 			}
 
 		};
@@ -47,15 +44,8 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				String arg = (String) param.args[0];
-				boolean isAppFilesDir = (arg == null);
-				File path = (File) param.getResult();
-				String appFilesDir = path.toString().replaceFirst(
-						getInternalSd(), getCustomInternalSd());
-				File appFilesDirPath = new File(appFilesDir);
-				if (isAppFilesDir) {
-					param.setResult(appFilesDirPath);
-				}
+				changeDirPath(param);
+
 			}
 
 		};
@@ -64,11 +54,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				File path = (File) param.getResult();
-				String obbDir = path.toString().replaceFirst(getInternalSd(),
-						getCustomInternalSd());
-				File obbDirPath = new File(obbDir);
-				param.setResult(obbDirPath);
+				changeDirPath(param);
 			}
 
 		};
@@ -77,18 +63,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
 					throws Throwable {
-				prefs.reload();
-				String dirType = (String) param.args[0];
-				Set<String> changeSystemDirsPath = prefs.getStringSet(
-						"change_system_dirs_path", new HashSet<String>());
-				boolean isAllowedDir = changeSystemDirsPath.contains(dirType);
-				File path = (File) param.getResult();
-				String systemDir = path.toString().replaceFirst(
-						getInternalSd(), getCustomInternalSd());
-				File systemDirPath = new File(systemDir);
-				if (isAllowedDir) {
-					param.setResult(systemDirPath);
-				}
+				changeDirPath(param);
 			}
 
 		};
@@ -123,7 +98,12 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		};
 
-		internalSd = Environment.getExternalStorageDirectory().getPath();
+		try {
+			File internalSdPath = Environment.getExternalStorageDirectory();
+			internalSd = internalSdPath.getPath();
+
+		} catch (Exception e) {
+		}
 		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
 				"com.android.server.pm.PackageManagerService", null),
 				"readPermission", XmlPullParser.class, String.class,
@@ -135,7 +115,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		if (!isEnabledApp(lpparam)) {
 			return;
 		}
-
+		if (internalSd == null) {
+			internalSd = Environment.getExternalStorageDirectory().getPath();
+		}
 		XposedHelpers.findAndHookMethod(Environment.class,
 				"getExternalStorageDirectory", getExternalStorageDirectoryHook);
 		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
@@ -187,6 +169,17 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		}
 		return isEnabledApp;
 
+	}
+
+	public void changeDirPath(MethodHookParam param) {
+		File oldDirPath = (File) param.getResult();
+		String newDir = oldDirPath.getPath().replaceFirst(getInternalSd(),
+				getCustomInternalSd());
+		File newDirPath = new File(newDir);
+		if (!newDirPath.exists()) {
+			newDirPath.mkdirs();
+		}
+		param.setResult(newDirPath);
 	}
 
 	public String getCustomInternalSd() {
