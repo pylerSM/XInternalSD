@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_description">내부 스토리지의 경로를 변경합니다</string>
+    <string name="app_settings">설정</string>
+    <string name="custom_internal_sd">내부 스토리지의 경로 변경</string>
+    <string name="internal_sd_path">변경 후의 내부 스토리지 경로</string>
+    <string name="enable_for_apps">활성화 할 앱</string>
+    <string name="enable_for_all_apps">모든 앱에 활성화</string>
+    <string name="disable_for_apps">비활성화 할 앱</string>
+    <string name="enter_internal_sd_path">내부 스토리지의 경로를 입력하세요</string>
+    <string name="sdcard_full_access">외부 스토리지 접근 권한 활성화</string>
+    <string name="include_system_apps">시스템 앱 포함</string>
+
+</resources>
