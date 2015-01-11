@@ -4,9 +4,9 @@
     <string name="app_settings">Nastavenia</string>
     <string name="custom_internal_sd">Vlastná cesta k internej karte SD</string>
     <string name="internal_sd_path">Cesta k internej karte SD</string>
-    <string name="enable_for_apps">Povoliť pre niektoré aplikácie</string>
+    <string name="enable_for_apps">Povoliť pre aplikácie</string>
     <string name="enable_for_all_apps">Povoliť pre všetky aplikácie</string>
-    <string name="disable_for_apps">Zakázať pre niektoré aplikácie</string>
+    <string name="disable_for_apps">Zakázať pre aplikácie</string>
     <string name="enter_internal_sd_path">Zadajte cestu k internej karte SD</string>
     <string name="sdcard_full_access">Plný prístup ku externej karte SD</string>
     <string name="include_system_apps">Zahrnúť systémové aplikácie</string>
