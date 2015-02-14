@@ -7,6 +7,7 @@ import java.util.Set;
 import org.xmlpull.v1.XmlPullParser;
 
 import android.content.pm.ApplicationInfo;
+import android.os.Build;
 import android.os.Environment;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -104,14 +105,19 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 		} catch (Exception e) {
 		}
-		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
-				"com.android.server.pm.PackageManagerService", null),
-				"readPermission", XmlPullParser.class, String.class,
-				externalSdCardAccessHook);
 	}
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
+		if ("android".equals(lpparam.packageName)) {
+			if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+				XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+						"com.android.server.pm.PackageManagerService",
+						lpparam.classLoader), "readPermission",
+						XmlPullParser.class, String.class,
+						externalSdCardAccessHook);
+			}
+		}
 		if (!isEnabledApp(lpparam)) {
 			return;
 		}

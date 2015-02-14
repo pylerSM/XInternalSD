@@ -71,7 +71,7 @@ public class Preferences extends Activity {
 				prefs.edit().putString("internal_sd_path", externalSd).apply();
 			}
 
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+			if (Build.VERSION.SDK_INT != Build.VERSION_CODES.KITKAT) {
 				appSettings.removePreference(sdCardFullAccess);
 			}
 		}
