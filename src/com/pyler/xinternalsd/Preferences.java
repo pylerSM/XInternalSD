@@ -71,7 +71,7 @@ public class Preferences extends Activity {
 				prefs.edit().putString("internal_sd_path", externalSd).apply();
 			}
 
-			if (Build.VERSION.SDK_INT != Build.VERSION_CODES.KITKAT) {
+			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
 				appSettings.removePreference(sdCardFullAccess);
 			}
 		}
@@ -93,7 +93,6 @@ public class Preferences extends Activity {
 
 		public class LoadApps extends AsyncTask<Void, Void, Void> {
 			MultiSelectListPreference enabledApps = (MultiSelectListPreference) findPreference("enable_for_apps");
-			MultiSelectListPreference disabledApps = (MultiSelectListPreference) findPreference("disable_for_apps");
 			List<CharSequence> apps = new ArrayList<CharSequence>();
 			List<CharSequence> packageNames = new ArrayList<CharSequence>();
 			PackageManager pm = context.getPackageManager();
@@ -103,7 +102,6 @@ public class Preferences extends Activity {
 			@Override
 			protected void onPreExecute() {
 				enabledApps.setEnabled(false);
-				disabledApps.setEnabled(false);
 			}
 
 			@Override
@@ -143,10 +141,7 @@ public class Preferences extends Activity {
 
 				enabledApps.setEntries(appsList);
 				enabledApps.setEntryValues(packageNamesList);
-				disabledApps.setEntries(appsList);
-				disabledApps.setEntryValues(packageNamesList);
 				enabledApps.setEnabled(true);
-				disabledApps.setEnabled(true);
 			}
 		}
 

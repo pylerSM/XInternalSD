@@ -6,8 +6,6 @@
     <string name="custom_internal_sd">Custom path to internal SD card</string>
     <string name="internal_sd_path">Path to internal SD card</string>
     <string name="enable_for_apps">Enable for apps</string>
-    <string name="enable_for_all_apps">Enable for all apps</string>
-    <string name="disable_for_apps">Disable for apps</string>
     <string name="enter_internal_sd_path">Enter path to internal SD card</string>
     <string name="sdcard_full_access">Full access to external SD card</string>
     <string name="include_system_apps">Include system apps</string>

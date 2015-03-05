@@ -14,6 +14,7 @@ import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam;
 import de.robv.android.xposed.XSharedPreferences;
+import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
@@ -85,10 +86,16 @@ public class XInternalSD implements IXposedHookZygoteInit,
 							"android.os.Process", null);
 					int gid = (Integer) XposedHelpers.callStaticMethod(process,
 							"getGidForName", "media_rw");
-					Object settings = XposedHelpers.getObjectField(
-							param.thisObject, "mSettings");
-					Object permissions = XposedHelpers.getObjectField(settings,
-							"mPermissions");
+					Object permissions = null;
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						permissions = XposedHelpers.getObjectField(
+								param.thisObject, "mPermissions");
+					} else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+						Object settings = XposedHelpers.getObjectField(
+								param.thisObject, "mSettings");
+						permissions = XposedHelpers.getObjectField(settings,
+								"mPermissions");
+					}
 					Object bp = XposedHelpers.callMethod(permissions, "get",
 							permission);
 					int[] bpGids = (int[]) XposedHelpers.getObjectField(bp,
@@ -102,15 +109,22 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		try {
 			File internalSdPath = Environment.getExternalStorageDirectory();
 			internalSd = internalSdPath.getPath();
-
 		} catch (Exception e) {
 		}
 	}
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
-		if ("android".equals(lpparam.packageName)) {
-			if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+		if ("android".equals(lpparam.packageName)
+				&& "android".equals(lpparam.processName)) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				XposedHelpers.findAndHookMethod(
+						XposedHelpers.findClass(
+								"com.android.server.SystemConfig",
+								lpparam.classLoader), "readPermission",
+						XmlPullParser.class, String.class,
+						externalSdCardAccessHook);
+			} else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
 				XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
 						"com.android.server.pm.PackageManagerService",
 						lpparam.classLoader), "readPermission",
@@ -119,10 +133,12 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		}
 		if (!isEnabledApp(lpparam)) {
+			if (internalSd == null) {
+				internalSd = Environment.getExternalStorageDirectory()
+						.getPath();
+			}
 			return;
-		}
-		if (internalSd == null) {
-			internalSd = Environment.getExternalStorageDirectory().getPath();
+
 		}
 		XposedHelpers.findAndHookMethod(Environment.class,
 				"getExternalStorageDirectory", getExternalStorageDirectoryHook);
@@ -155,24 +171,15 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		if (!isAllowedApp(lpparam.appInfo)) {
 			return false;
 		}
-		String packageName = lpparam.appInfo.packageName;
-		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
-				false);
-		if (enabledForAllApps) {
-			Set<String> disabledApps = prefs.getStringSet("disable_for_apps",
-					new HashSet<String>());
-			if (!disabledApps.isEmpty()) {
-				isEnabledApp = !disabledApps.contains(packageName);
-			}
+		String packageName = lpparam.packageName;
+		Set<String> enabledApps = prefs.getStringSet("enable_for_apps",
+				new HashSet<String>());
+		if (!enabledApps.isEmpty()) {
+			isEnabledApp = enabledApps.contains(packageName);
 		} else {
-			Set<String> enabledApps = prefs.getStringSet("enable_for_apps",
-					new HashSet<String>());
-			if (!enabledApps.isEmpty()) {
-				isEnabledApp = enabledApps.contains(packageName);
-			} else {
-				isEnabledApp = !isEnabledApp;
-			}
+			isEnabledApp = !isEnabledApp;
 		}
+		XposedBridge.log(packageName + " " + enabledApps.contains(packageName));
 		return isEnabledApp;
 
 	}
