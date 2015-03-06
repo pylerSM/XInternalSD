@@ -14,7 +14,6 @@ import de.robv.android.xposed.IXposedHookZygoteInit;
 import de.robv.android.xposed.XC_MethodHook;
 import de.robv.android.xposed.XC_MethodHook.MethodHookParam;
 import de.robv.android.xposed.XSharedPreferences;
-import de.robv.android.xposed.XposedBridge;
 import de.robv.android.xposed.XposedHelpers;
 import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
@@ -76,9 +75,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				prefs.reload();
 				String permission = (String) param.args[1];
-				boolean sdCardFullAccess = prefs.getBoolean(
-						"sdcard_full_access", true);
-				if (sdCardFullAccess
+				boolean externalSdCardFullAccess = prefs.getBoolean(
+						"external_sdcard_full_access", false);
+				if (externalSdCardFullAccess
 						&& (permission
 								.equals("android.permission.WRITE_EXTERNAL_STORAGE") || permission
 								.equals("android.permission.ACCESS_ALL_EXTERNAL_STORAGE"))) {
@@ -172,14 +171,17 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			return false;
 		}
 		String packageName = lpparam.packageName;
-		Set<String> enabledApps = prefs.getStringSet("enable_for_apps",
-				new HashSet<String>());
-		if (!enabledApps.isEmpty()) {
-			isEnabledApp = enabledApps.contains(packageName);
-		} else {
-			isEnabledApp = !isEnabledApp;
+		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
+				false);
+		if (!enabledForAllApps) {
+			Set<String> enabledApps = prefs.getStringSet("enable_for_apps",
+					new HashSet<String>());
+			if (!enabledApps.isEmpty()) {
+				isEnabledApp = enabledApps.contains(packageName);
+			} else {
+				isEnabledApp = !isEnabledApp;
+			}
 		}
-		XposedBridge.log(packageName + " " + enabledApps.contains(packageName));
 		return isEnabledApp;
 
 	}
@@ -197,7 +199,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 	public String getCustomInternalSd() {
 		prefs.reload();
-		String customInternalSd = prefs.getString("internal_sd_path",
+		String customInternalSd = prefs.getString("internal_sdcard_path",
 				getInternalSd());
 		return customInternalSd;
 	}
