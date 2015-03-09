@@ -215,10 +215,11 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		if ("android".equals(lpparam.packageName) && includeSystemApps) {
 			return true;
 		}
-		if (lpparam.appInfo != null) {
-			if (!isAllowedApp(lpparam.appInfo)) {
-				return false;
-			}
+		if (lpparam.appInfo == null) {
+			return false;
+		}
+		if (!isAllowedApp(lpparam.appInfo)) {
+			return false;
 		}
 		String packageName = lpparam.packageName;
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
