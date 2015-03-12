@@ -1,11 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pyler.xinternalsd"
-    android:versionCode="360"
-    android:versionName="3.6" >
+    android:versionCode="365"
+    android:versionName="3.6.5" >
 
     <uses-sdk
         android:minSdkVersion="15"
-        android:targetSdkVersion="21" />
+        android:targetSdkVersion="22" />
 
     <application
         android:allowBackup="true"

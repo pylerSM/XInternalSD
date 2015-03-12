@@ -6,6 +6,7 @@
     <string name="internal_sdcard_path">内置储存卡路径</string>
     <string name="enable_for_apps">对某些应用启用</string>
     <string name="enable_for_all_apps">对所有应用启用</string>
+    <string name="disable_for_apps">对某些应用禁用</string>
     <string name="enter_internal_sdcard_path">输入内置储存卡的路径</string>
     <string name="external_sdcard_full_access">对外置储存卡的完整权限</string>
     <string name="include_system_apps">包含系统应用</string>

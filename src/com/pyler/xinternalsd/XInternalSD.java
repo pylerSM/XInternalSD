@@ -39,7 +39,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				changeDirPath(param);
 			}
-
 		};
 
 		getExternalFilesDirHook = new XC_MethodHook() {
@@ -49,7 +48,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				changeDirPath(param);
 
 			}
-
 		};
 
 		getObbDirHook = new XC_MethodHook() {
@@ -58,7 +56,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				changeDirPath(param);
 			}
-
 		};
 
 		getExternalStoragePublicDirectoryHook = new XC_MethodHook() {
@@ -67,7 +64,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				changeDirPath(param);
 			}
-
 		};
 
 		externalSdCardAccessHook = new XC_MethodHook() {
@@ -77,7 +73,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				prefs.reload();
 				String permission = (String) param.args[1];
 				boolean externalSdCardFullAccess = prefs.getBoolean(
-						"external_sdcard_full_access", false);
+						"external_sdcard_full_access", true);
 				if (!externalSdCardFullAccess) {
 					return;
 				}
@@ -115,7 +111,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				prefs.reload();
 				boolean externalSdCardFullAccess = prefs.getBoolean(
-						"external_sdcard_full_access", false);
+						"external_sdcard_full_access", true);
 				if (!externalSdCardFullAccess) {
 					return;
 				}
@@ -145,11 +141,8 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		};
 
-		try {
-			File internalSdPath = Environment.getExternalStorageDirectory();
-			internalSd = internalSdPath.getPath();
-		} catch (Exception e) {
-		}
+		File internalSdPath = Environment.getExternalStorageDirectory();
+		internalSd = internalSdPath.getPath();
 	}
 
 	@Override
@@ -183,10 +176,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		}
 		if (!isEnabledApp(lpparam)) {
-			if (internalSd == null) {
-				internalSd = Environment.getExternalStorageDirectory()
-						.getPath();
-			}
 			return;
 
 		}
@@ -221,10 +210,16 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		if (!isAllowedApp(lpparam.appInfo)) {
 			return false;
 		}
-		String packageName = lpparam.packageName;
+		String packageName = lpparam.appInfo.packageName;
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
 				false);
-		if (!enabledForAllApps) {
+		if (enabledForAllApps) {
+			Set<String> disabledApps = prefs.getStringSet("disable_for_apps",
+					new HashSet<String>());
+			if (!disabledApps.isEmpty()) {
+				isEnabledApp = !disabledApps.contains(packageName);
+			}
+		} else {
 			Set<String> enabledApps = prefs.getStringSet("enable_for_apps",
 					new HashSet<String>());
 			if (!enabledApps.isEmpty()) {
@@ -234,7 +229,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		}
 		return isEnabledApp;
-
 	}
 
 	public void changeDirPath(MethodHookParam param) {

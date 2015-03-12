@@ -6,6 +6,7 @@
     <string name="internal_sdcard_path">Путь к внутренней SD карте</string>
     <string name="enable_for_apps">Включить для приложений</string>
     <string name="enable_for_all_apps">Включить для всех приложений</string>
+    <string name="disable_for_apps">Отключить для приложений</string>
     <string name="enter_internal_sdcard_path">Введите путь к внутренней SD карте</string>
     <string name="external_sdcard_full_access">Полный доступ к внешней SD карте</string>
     <string name="include_system_apps">Включить системные приложения</string>
