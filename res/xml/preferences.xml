@@ -6,13 +6,13 @@
         android:title="@string/app_settings" >
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="custom_internal_sd"
-            android:title="@string/custom_internal_sd" />
+            android:key="custom_internal_sdcard_path"
+            android:title="@string/custom_internal_sdcard_path" />
 
         <EditTextPreference
-            android:key="internal_sd_path"
-            android:summary="@string/enter_internal_sd_path"
-            android:title="@string/internal_sd_path" />
+            android:key="internal_sdcard_path"
+            android:summary="@string/enter_internal_sdcard_path"
+            android:title="@string/internal_sdcard_path" />
 
         <CheckBoxPreference
             android:defaultValue="false"
@@ -32,8 +32,8 @@
             android:title="@string/include_system_apps" />
         <CheckBoxPreference
             android:defaultValue="true"
-            android:key="sdcard_full_access"
-            android:title="@string/sdcard_full_access" />
+            android:key="external_sdcard_full_access"
+            android:title="@string/external_sdcard_full_access" />
     </PreferenceCategory>
 
 </PreferenceScreen>

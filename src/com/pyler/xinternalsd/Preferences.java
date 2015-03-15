@@ -42,8 +42,8 @@ public class Preferences extends Activity {
 			addPreferencesFromResource(R.xml.preferences);
 			prefs = PreferenceManager.getDefaultSharedPreferences(context);
 			PreferenceCategory appSettings = (PreferenceCategory) findPreference("app_settings");
-			Preference sdCardFullAccess = findPreference("sdcard_full_access");
-			EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sd_path");
+			Preference externalSdCardFullAccess = findPreference("external_sdcard_full_access");
+			EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sdcard_path");
 			Preference includeSystemApps = findPreference("include_system_apps");
 			includeSystemApps
 					.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
@@ -57,22 +57,24 @@ public class Preferences extends Activity {
 
 			reloadAppsList();
 
-			String customInternalSD = prefs.getString("internal_sd_path", "");
-			if (!customInternalSD.isEmpty()) {
-				internalSdPath.setSummary(customInternalSD);
+			String customInternalSdPath = prefs.getString(
+					"internal_sdcard_path", "");
+			if (!customInternalSdPath.isEmpty()) {
+				internalSdPath.setSummary(customInternalSdPath);
 			}
 
 			String extStorage = System.getenv("SECONDARY_STORAGE");
 			if (extStorage != null && !extStorage.isEmpty()
-					&& customInternalSD.isEmpty()) {
+					&& customInternalSdPath.isEmpty()) {
 				String externalSd = extStorage.split(":")[0];
 				internalSdPath.setSummary(externalSd);
 				internalSdPath.setText(externalSd);
-				prefs.edit().putString("internal_sd_path", externalSd).apply();
+				prefs.edit().putString("internal_sdcard_path", externalSd)
+						.apply();
 			}
 
 			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-				appSettings.removePreference(sdCardFullAccess);
+				appSettings.removePreference(externalSdCardFullAccess);
 			}
 		}
 
@@ -143,9 +145,9 @@ public class Preferences extends Activity {
 
 				enabledApps.setEntries(appsList);
 				enabledApps.setEntryValues(packageNamesList);
+				enabledApps.setEnabled(true);
 				disabledApps.setEntries(appsList);
 				disabledApps.setEntryValues(packageNamesList);
-				enabledApps.setEnabled(true);
 				disabledApps.setEnabled(true);
 			}
 		}

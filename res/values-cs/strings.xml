@@ -2,12 +2,13 @@
 
     <string name="app_description">Změnit cestu k interní kartě SD</string>
     <string name="app_settings">Nastavení</string>
-    <string name="custom_internal_sd">Vlastní cesta k interní kartě SD</string>
-    <string name="internal_sd_path">Cesta k interní kartě SD</string>
-    <string name="enable_for_apps">Povolit pro některé aplikace</string>
+    <string name="custom_internal_sdcard_path">Vlastní cesta k interní kartě SD</string>
+    <string name="internal_sdcard_path">Cesta k interní kartě SD</string>
+    <string name="enable_for_apps">Povolit pro aplikace</string>
     <string name="enable_for_all_apps">Povolit pro všechny aplikace</string>
-    <string name="disable_for_apps">Zakázat pro některé aplikace</string>
-    <string name="enter_internal_sd_path">Zadejte cestu k interní kartě SD</string>
-    <string name="sdcard_full_access">Plný přístup ke externí kartě SD</string>
+    <string name="disable_for_apps">Zakázat pro aplikace</string>
+    <string name="enter_internal_sdcard_path">Zadejte cestu k interní kartě SD</string>
+    <string name="external_sdcard_full_access">Plný přístup ke externí kartě SD</string>
     <string name="include_system_apps">Zahrnout systémové aplikace</string>
+
 </resources>

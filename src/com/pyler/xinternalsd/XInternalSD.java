@@ -7,6 +7,7 @@ import java.util.Set;
 import org.xmlpull.v1.XmlPullParser;
 
 import android.content.pm.ApplicationInfo;
+import android.os.Build;
 import android.os.Environment;
 import de.robv.android.xposed.IXposedHookLoadPackage;
 import de.robv.android.xposed.IXposedHookZygoteInit;
@@ -25,6 +26,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 	public XC_MethodHook getObbDirHook;
 	public XC_MethodHook getExternalStoragePublicDirectoryHook;
 	public XC_MethodHook externalSdCardAccessHook;
+	public XC_MethodHook grantStoragePermissionsHook;
 
 	@Override
 	public void initZygote(StartupParam startupParam) throws Throwable {
@@ -37,7 +39,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				changeDirPath(param);
 			}
-
 		};
 
 		getExternalFilesDirHook = new XC_MethodHook() {
@@ -47,7 +48,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				changeDirPath(param);
 
 			}
-
 		};
 
 		getObbDirHook = new XC_MethodHook() {
@@ -56,7 +56,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				changeDirPath(param);
 			}
-
 		};
 
 		getExternalStoragePublicDirectoryHook = new XC_MethodHook() {
@@ -65,7 +64,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				changeDirPath(param);
 			}
-
 		};
 
 		externalSdCardAccessHook = new XC_MethodHook() {
@@ -74,20 +72,29 @@ public class XInternalSD implements IXposedHookZygoteInit,
 					throws Throwable {
 				prefs.reload();
 				String permission = (String) param.args[1];
-				boolean sdCardFullAccess = prefs.getBoolean(
-						"sdcard_full_access", true);
-				if (sdCardFullAccess
-						&& (permission
-								.equals("android.permission.WRITE_EXTERNAL_STORAGE") || permission
-								.equals("android.permission.ACCESS_ALL_EXTERNAL_STORAGE"))) {
+				boolean externalSdCardFullAccess = prefs.getBoolean(
+						"external_sdcard_full_access", true);
+				if (!externalSdCardFullAccess) {
+					return;
+				}
+				if (permission
+						.equals("android.permission.WRITE_EXTERNAL_STORAGE")
+						|| permission
+								.equals("android.permission.ACCESS_ALL_EXTERNAL_STORAGE")) {
 					Class<?> process = XposedHelpers.findClass(
 							"android.os.Process", null);
 					int gid = (Integer) XposedHelpers.callStaticMethod(process,
 							"getGidForName", "media_rw");
-					Object settings = XposedHelpers.getObjectField(
-							param.thisObject, "mSettings");
-					Object permissions = XposedHelpers.getObjectField(settings,
-							"mPermissions");
+					Object permissions = null;
+					if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+						permissions = XposedHelpers.getObjectField(
+								param.thisObject, "mPermissions");
+					} else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+						Object settings = XposedHelpers.getObjectField(
+								param.thisObject, "mSettings");
+						permissions = XposedHelpers.getObjectField(settings,
+								"mPermissions");
+					}
 					Object bp = XposedHelpers.callMethod(permissions, "get",
 							permission);
 					int[] bpGids = (int[]) XposedHelpers.getObjectField(bp,
@@ -98,25 +105,79 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		};
 
-		try {
-			File internalSdPath = Environment.getExternalStorageDirectory();
-			internalSd = internalSdPath.getPath();
+		grantStoragePermissionsHook = new XC_MethodHook() {
+			@Override
+			protected void afterHookedMethod(MethodHookParam param)
+					throws Throwable {
+				prefs.reload();
+				boolean externalSdCardFullAccess = prefs.getBoolean(
+						"external_sdcard_full_access", true);
+				if (!externalSdCardFullAccess) {
+					return;
+				}
+				final Object extras = XposedHelpers.getObjectField(
+						param.args[0], "mExtras");
+				@SuppressWarnings("unchecked")
+				final HashSet<String> grantedPermissions = (HashSet<String>) XposedHelpers
+						.getObjectField(extras, "grantedPermissions");
+				final Object settings = XposedHelpers.getObjectField(
+						param.thisObject, "mSettings");
+				final Object permissions = XposedHelpers.getObjectField(
+						settings, "mPermissions");
+				if (!grantedPermissions
+						.contains("android.permission.WRITE_MEDIA_STORAGE")) {
+					final Object pWriteMediaStorage = XposedHelpers.callMethod(
+							permissions, "get",
+							"android.permission.WRITE_MEDIA_STORAGE");
+					grantedPermissions
+							.add("android.permission.WRITE_MEDIA_STORAGE");
+					int[] gpGids = (int[]) XposedHelpers.getObjectField(extras,
+							"gids");
+					int[] bpGids = (int[]) XposedHelpers.getObjectField(
+							pWriteMediaStorage, "gids");
+					XposedHelpers.callStaticMethod(param.thisObject.getClass(),
+							"appendInts", gpGids, bpGids);
+				}
+			}
+		};
 
-		} catch (Exception e) {
-		}
-		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
-				"com.android.server.pm.PackageManagerService", null),
-				"readPermission", XmlPullParser.class, String.class,
-				externalSdCardAccessHook);
+		File internalSdPath = Environment.getExternalStorageDirectory();
+		internalSd = internalSdPath.getPath();
 	}
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
+		if ("android".equals(lpparam.packageName)
+				&& "android".equals(lpparam.processName)) {
+			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+				XposedHelpers.findAndHookMethod(
+						XposedHelpers.findClass(
+								"com.android.server.SystemConfig",
+								lpparam.classLoader), "readPermission",
+						XmlPullParser.class, String.class,
+						externalSdCardAccessHook);
+				XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+						"com.android.server.pm.PackageManagerService",
+						lpparam.classLoader), "grantPermissionsLPw",
+						"android.content.pm.PackageParser.Package",
+						boolean.class, String.class,
+						grantStoragePermissionsHook);
+			} else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.KITKAT) {
+				XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+						"com.android.server.pm.PackageManagerService",
+						lpparam.classLoader), "readPermission",
+						XmlPullParser.class, String.class,
+						externalSdCardAccessHook);
+				XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+						"com.android.server.pm.PackageManagerService",
+						lpparam.classLoader), "grantPermissionsLPw",
+						"android.content.pm.PackageParser.Package",
+						boolean.class, grantStoragePermissionsHook);
+			}
+		}
 		if (!isEnabledApp(lpparam)) {
 			return;
-		}
-		if (internalSd == null) {
-			internalSd = Environment.getExternalStorageDirectory().getPath();
+
 		}
 		XposedHelpers.findAndHookMethod(Environment.class,
 				"getExternalStorageDirectory", getExternalStorageDirectoryHook);
@@ -168,7 +229,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			}
 		}
 		return isEnabledApp;
-
 	}
 
 	public void changeDirPath(MethodHookParam param) {
@@ -184,7 +244,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 	public String getCustomInternalSd() {
 		prefs.reload();
-		String customInternalSd = prefs.getString("internal_sd_path",
+		String customInternalSd = prefs.getString("internal_sdcard_path",
 				getInternalSd());
 		return customInternalSd;
 	}
@@ -195,6 +255,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 	public boolean isAllowedApp(ApplicationInfo appInfo) {
 		boolean isAllowedApp = true;
+		prefs.reload();
 		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
 				false);
 		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
