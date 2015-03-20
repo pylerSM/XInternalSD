@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pyler.xinternalsd"
     android:versionCode="370"
-    android:versionName="3.70" >
+    android:versionName="3.7" >
 
     <uses-sdk
         android:minSdkVersion="15"
