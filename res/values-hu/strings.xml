@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_description">Belső SD kártya útvonal módosítása</string>
+    <string name="app_settings">Beállítások</string>
+    <string name="custom_internal_sdcard_path">Egyéni útvonal a Belső SD kártyáról</string>
+    <string name="internal_sdcard_path">Útvonal a Belső SD kártyáról</string>
+    <string name="enable_for_apps">Engedélyezett alkalmazások</string>
+    <string name="enable_for_all_apps">Engedélyezi az összes alkalmazást</string>
+    <string name="disable_for_apps">Alkalmazások tiltása</string>
+    <string name="enter_internal_sdcard_path">Adja meg a belső SD kártya útvonalát</string>
+    <string name="external_sdcard_full_access">Teljes hozzáférés a Külső SD kártyán</string>
+    <string name="include_system_apps">Tartalmazza a rendszer alkalmazásokat</string>
+
+</resources>
