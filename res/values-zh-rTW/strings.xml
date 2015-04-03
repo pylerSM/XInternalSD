@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_description">變更內置SD卡路徑</string>
+    <string name="app_settings">設定</string>
+    <string name="custom_internal_sdcard_path">自訂內置SD卡路徑</string>
+    <string name="internal_sdcard_path">內置SD卡路徑</string>
+    <string name="enable_for_apps">僅套用部分應用程式</string>
+    <string name="enable_for_all_apps">套用所有應用程式</string>
+    <string name="disable_for_apps">對部分應用程式禁用</string>
+    <string name="enter_internal_sdcard_path">輸入內置SD卡路徑</string>
+    <string name="external_sdcard_full_access">取得外置SD卡完整讀寫權限</string>
+    <string name="include_system_apps">包含系統應用程式</string>
+
+</resources>
