@@ -1,0 +1,14 @@
+<resources>
+
+    <string name="app_description">Cambia la ruta de acceso a la tarjeta SD interna</string>
+    <string name="app_settings">Ajustes</string>
+    <string name="custom_internal_sdcard_path">Ruta por defecto para la tarjeta SD interna</string>
+    <string name="internal_sdcard_path">Ruta de acceso a la tarjeta SD interna</string>
+    <string name="enable_for_apps">Aplicaciones a permitir</string>
+    <string name="enable_for_all_apps">Permitir todas las aplicaciones</string>
+    <string name="disable_for_apps">Aplicaciones a ignorar</string>
+    <string name="enter_internal_sdcard_path">Escriba la ruta de acceso a la tarjeta SD interna</string>
+    <string name="external_sdcard_full_access">Acceso completo a la tarjeta SD externa</string>
+    <string name="include_system_apps">Mostrar apps del sistema</string>
+
+</resources>

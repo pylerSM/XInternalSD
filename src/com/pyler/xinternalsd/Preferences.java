@@ -96,7 +96,7 @@ public class Preferences extends Activity {
 		public class LoadApps extends AsyncTask<Void, Void, Void> {
 			MultiSelectListPreference enabledApps = (MultiSelectListPreference) findPreference("enable_for_apps");
 			MultiSelectListPreference disabledApps = (MultiSelectListPreference) findPreference("disable_for_apps");
-			List<CharSequence> apps = new ArrayList<CharSequence>();
+			List<CharSequence> appNames = new ArrayList<CharSequence>();
 			List<CharSequence> packageNames = new ArrayList<CharSequence>();
 			PackageManager pm = context.getPackageManager();
 			List<ApplicationInfo> packages = pm
@@ -129,8 +129,8 @@ public class Preferences extends Activity {
 				});
 
 				for (int i = 0; i < sortedApps.size(); i++) {
+					appNames.add(sortedApps.get(i)[1]);
 					packageNames.add(sortedApps.get(i)[0]);
-					apps.add(sortedApps.get(i)[1]);
 				}
 
 				return null;
@@ -138,15 +138,15 @@ public class Preferences extends Activity {
 
 			@Override
 			protected void onPostExecute(Void result) {
-				CharSequence[] appsList = apps.toArray(new CharSequence[apps
-						.size()]);
+				CharSequence[] appNamesList = appNames
+						.toArray(new CharSequence[appNames.size()]);
 				CharSequence[] packageNamesList = packageNames
 						.toArray(new CharSequence[packageNames.size()]);
 
-				enabledApps.setEntries(appsList);
+				enabledApps.setEntries(appNamesList);
 				enabledApps.setEntryValues(packageNamesList);
 				enabledApps.setEnabled(true);
-				disabledApps.setEntries(appsList);
+				disabledApps.setEntries(appNamesList);
 				disabledApps.setEntryValues(packageNamesList);
 				disabledApps.setEnabled(true);
 			}
