@@ -212,9 +212,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		System.arraycopy(oldDirPaths, 0, newDirPaths, 0, oldDirPaths.length);
 		String newDir = oldDirPaths[0].getPath().replaceFirst(getInternalSd(),
 				getCustomInternalSd());
-		newDirPaths[oldDirPaths.length-1] = new File(newDir);
-		if (!newDirPaths[oldDirPaths.length-1].exists()) {
-			newDirPaths[oldDirPaths.length-1].mkdirs();
+		newDirPaths[newDirPaths.length-1] = new File(newDir);
+		if (!newDirPaths[newDirPaths.length-1].exists()) {
+			newDirPaths[newDirPaths.length-1].mkdirs();
 		}
 		param.setResult(newDirPaths);
 	}
