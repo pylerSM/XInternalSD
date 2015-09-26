@@ -208,15 +208,23 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 	public void appendDirPath(MethodHookParam param) {
 		File[] oldDirPaths = (File[]) param.getResult();
-		File[] newDirPaths = new File[oldDirPaths.length + 1];
-		System.arraycopy(oldDirPaths, 0, newDirPaths, 0, oldDirPaths.length);
-		String newDir = oldDirPaths[0].getPath().replaceFirst(getInternalSd(),
-				getCustomInternalSd());
-		newDirPaths[newDirPaths.length-1] = new File(newDir);
-		if (!newDirPaths[newDirPaths.length-1].exists()) {
-			newDirPaths[newDirPaths.length-1].mkdirs();
+		List<File> newDirPaths = new ArrayList<File>();
+		for (File f: oldDirPaths) {
+			if (f != null) {
+				newDirPaths.add(f);
+			}
 		}
-		param.setResult(newDirPaths);
+		if (getCustomInternalSd() != "") {
+			String newDir = oldDirPaths[0].getPath().replaceFirst(getInternalSd(),
+					getCustomInternalSd());
+			File CustomInternalSd = new File(newDir);
+			newDirPaths.add(CustomInternalSd);
+			if (!CustomInternalSd.exists()) {
+				CustomInternalSd.mkdirs();
+			}
+		}
+		File[] newParams = newDirPaths.toArray(new File[newDirPaths.size()]);
+		param.setResult(newParams);
 	}
 
 	public String getCustomInternalSd() {
