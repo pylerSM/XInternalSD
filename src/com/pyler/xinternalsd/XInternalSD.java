@@ -25,6 +25,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 	public XC_MethodHook getExternalFilesDirHook;
 	public XC_MethodHook getObbDirHook;
 	public XC_MethodHook getExternalStoragePublicDirectoryHook;
+	public XC_MethodHook getExternalFilesDirsHook;
 	public XC_MethodHook externalSdCardAccessHook;
 
 	@Override
@@ -64,7 +65,15 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				changeDirPath(param);
 			}
 		};
-
+		
+		getExternalFilesDirsHook = new XC_MethodHook() {
+			@Override
+			protected void afterHookedMethod(MethodHookParam param)
+					throws Throwable {
+				appendDirPath(param);
+			}
+		};
+		
 		externalSdCardAccessHook = new XC_MethodHook() {
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
@@ -142,6 +151,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		XposedHelpers.findAndHookMethod(Environment.class,
 				"getExternalStoragePublicDirectory", String.class,
 				getExternalStoragePublicDirectoryHook);
+		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+						"android.app.ContextImpl", lpparam.classLoader),
+				"getExternalFilesDirs", String.class, getExternalFilesDirsHook);				
 	}
 
 	public boolean isEnabledApp(LoadPackageParam lpparam) {
@@ -192,6 +204,27 @@ public class XInternalSD implements IXposedHookZygoteInit,
 			newDirPath.mkdirs();
 		}
 		param.setResult(newDirPath);
+	}
+
+	public void appendDirPath(MethodHookParam param) {
+		File[] oldDirPaths = (File[]) param.getResult();
+		List<File> newDirPaths = new ArrayList<File>();
+		for (File f: oldDirPaths) {
+			if (f != null) {
+				newDirPaths.add(f);
+			}
+		}
+		if (getCustomInternalSd() != "") {
+			String newDir = oldDirPaths[0].getPath().replaceFirst(getInternalSd(),
+					getCustomInternalSd());
+			File CustomInternalSd = new File(newDir);
+			newDirPaths.add(CustomInternalSd);
+			if (!CustomInternalSd.exists()) {
+				CustomInternalSd.mkdirs();
+			}
+		}
+		File[] newParams = newDirPaths.toArray(new File[newDirPaths.size()]);
+		param.setResult(newParams);
 	}
 
 	public String getCustomInternalSd() {
