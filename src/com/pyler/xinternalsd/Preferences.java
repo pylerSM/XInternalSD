@@ -57,16 +57,16 @@ public class Preferences extends Activity {
 
 			reloadAppsList();
 
-			String customInternalSdPath = prefs.getString(
-					"internal_sdcard_path", "");
-			if (!customInternalSdPath.isEmpty()) {
-				internalSdPath.setSummary(customInternalSdPath);
+			String customInternalSd = prefs.getString("internal_sdcard_path",
+					"");
+			if (!customInternalSd.isEmpty()) {
+				internalSdPath.setSummary(customInternalSd);
 			}
 
-			String extStorage = System.getenv("SECONDARY_STORAGE");
-			if (extStorage != null && !extStorage.isEmpty()
-					&& customInternalSdPath.isEmpty()) {
-				String externalSd = extStorage.split(":")[0];
+			String externalStorage = System.getenv("SECONDARY_STORAGE");
+			if (externalStorage != null && !externalStorage.isEmpty()
+					&& customInternalSd.isEmpty()) {
+				String externalSd = externalStorage.split(":")[0];
 				internalSdPath.setSummary(externalSd);
 				internalSdPath.setText(externalSd);
 				prefs.edit().putString("internal_sdcard_path", externalSd)

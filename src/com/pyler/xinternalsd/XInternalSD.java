@@ -1,6 +1,7 @@
 package com.pyler.xinternalsd;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -65,7 +66,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				changeDirPath(param);
 			}
 		};
-		
+
 		getExternalFilesDirsHook = new XC_MethodHook() {
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
@@ -73,7 +74,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				appendDirPath(param);
 			}
 		};
-		
+
 		externalSdCardAccessHook = new XC_MethodHook() {
 			@Override
 			protected void afterHookedMethod(MethodHookParam param)
@@ -151,30 +152,26 @@ public class XInternalSD implements IXposedHookZygoteInit,
 		XposedHelpers.findAndHookMethod(Environment.class,
 				"getExternalStoragePublicDirectory", String.class,
 				getExternalStoragePublicDirectoryHook);
-		XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
-						"android.app.ContextImpl", lpparam.classLoader),
-				"getExternalFilesDirs", String.class, getExternalFilesDirsHook);				
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+			XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+					"android.app.ContextImpl", lpparam.classLoader),
+					"getExternalFilesDirs", String.class,
+					getExternalFilesDirsHook);
+		}
 	}
 
 	public boolean isEnabledApp(LoadPackageParam lpparam) {
 		boolean isEnabledApp = true;
 		prefs.reload();
 		boolean enabledModule = prefs.getBoolean("custom_internal_sd", true);
-		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
-				false);
 		if (!enabledModule) {
-			return false;
-		}
-		if ("android".equals(lpparam.packageName) && includeSystemApps) {
-			return true;
-		}
-		if (lpparam.appInfo == null) {
 			return false;
 		}
 		if (!isAllowedApp(lpparam.appInfo)) {
 			return false;
 		}
-		String packageName = lpparam.appInfo.packageName;
+		String packageName = lpparam.packageName;
 		boolean enabledForAllApps = prefs.getBoolean("enable_for_all_apps",
 				false);
 		if (enabledForAllApps) {
@@ -197,8 +194,12 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 	public void changeDirPath(MethodHookParam param) {
 		File oldDirPath = (File) param.getResult();
+		String customInternalSd = getCustomInternalSd();
+		if (customInternalSd.isEmpty()) {
+			return;
+		}
 		String newDir = oldDirPath.getPath().replaceFirst(getInternalSd(),
-				getCustomInternalSd());
+				customInternalSd);
 		File newDirPath = new File(newDir);
 		if (!newDirPath.exists()) {
 			newDirPath.mkdirs();
@@ -208,23 +209,28 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
 	public void appendDirPath(MethodHookParam param) {
 		File[] oldDirPaths = (File[]) param.getResult();
-		List<File> newDirPaths = new ArrayList<File>();
-		for (File f: oldDirPaths) {
-			if (f != null) {
-				newDirPaths.add(f);
+		ArrayList<File> newDirPaths = new ArrayList<File>();
+		for (File oldDirPath : oldDirPaths) {
+			if (oldDirPath != null) {
+				newDirPaths.add(oldDirPath);
 			}
 		}
-		if (getCustomInternalSd() != "") {
-			String newDir = oldDirPaths[0].getPath().replaceFirst(getInternalSd(),
-					getCustomInternalSd());
-			File CustomInternalSd = new File(newDir);
-			newDirPaths.add(CustomInternalSd);
-			if (!CustomInternalSd.exists()) {
-				CustomInternalSd.mkdirs();
-			}
+		String customInternalSd = getCustomInternalSd();
+		if (customInternalSd.isEmpty()) {
+			return;
 		}
-		File[] newParams = newDirPaths.toArray(new File[newDirPaths.size()]);
-		param.setResult(newParams);
+		String newDir = oldDirPaths[0].getPath().replaceFirst(getInternalSd(),
+				customInternalSd);
+		File newDirPath = new File(newDir);
+		if (newDirPaths.contains(newDirPath)) {
+			newDirPaths.add(newDirPath);
+		}
+		if (!newDirPath.exists()) {
+			newDirPath.mkdirs();
+		}
+		File[] appendedDirPaths = newDirPaths.toArray(new File[newDirPaths
+				.size()]);
+		param.setResult(appendedDirPaths);
 	}
 
 	public String getCustomInternalSd() {
@@ -239,15 +245,18 @@ public class XInternalSD implements IXposedHookZygoteInit,
 	}
 
 	public boolean isAllowedApp(ApplicationInfo appInfo) {
-		boolean isAllowedApp = true;
 		prefs.reload();
 		boolean includeSystemApps = prefs.getBoolean("include_system_apps",
 				false);
-		if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-				&& !includeSystemApps) {
-			isAllowedApp = false;
+		if (appInfo == null) {
+			return includeSystemApps;
+		} else {
+			if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+					&& !includeSystemApps) {
+				return false;
+			}
 		}
-		return isAllowedApp;
+		return true;
 	}
 
 	public int[] appendInt(int[] cur, int val) {
