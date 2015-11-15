@@ -28,6 +28,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
 	public XC_MethodHook getExternalStoragePublicDirectoryHook;
 	public XC_MethodHook getExternalFilesDirsHook;
 	public XC_MethodHook externalSdCardAccessHook;
+	boolean detectedSdPath = false;
 
 	@Override
 	public void initZygote(StartupParam startupParam) throws Throwable {
@@ -113,15 +114,18 @@ public class XInternalSD implements IXposedHookZygoteInit,
 				}
 			}
 		};
-
-		File internalSdPath = Environment.getExternalStorageDirectory();
-		internalSd = internalSdPath.getPath();
 	}
 
 	@Override
 	public void handleLoadPackage(LoadPackageParam lpparam) throws Throwable {
 		if ("android".equals(lpparam.packageName)
 				&& "android".equals(lpparam.processName)) {
+			if (!detectedSdPath) {
+				File internalSdPath = Environment.getExternalStorageDirectory();
+				internalSd = internalSdPath.getPath();
+				detectedSdPath = true;
+			}
+
 			if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
 				XposedHelpers.findAndHookMethod(
 						XposedHelpers.findClass(
