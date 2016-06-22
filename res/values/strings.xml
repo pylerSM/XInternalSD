@@ -11,5 +11,6 @@
     <string name="enter_internal_sdcard_path">Enter path to internal SD card</string>
     <string name="external_sdcard_full_access">Full access to external SD card</string>
     <string name="include_system_apps">Include system apps</string>
+    <string name="reboot_required">Device reboot is required for changes to take effect.</string>
 
 </resources>
