@@ -72,7 +72,7 @@ public class Preferences extends Activity {
                             return true;
                         }
                     });
-            if (Build.VERSION.SDK_INT >= 23) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 externalSdCardFullAccess.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                     @Override
                     public boolean onPreferenceChange(Preference preference, Object newValue) {
@@ -106,7 +106,7 @@ public class Preferences extends Activity {
                     }
                 }
 
-                if (externalSd != null || !externalSd.isEmpty()) {
+                if (externalSd != null && !externalSd.isEmpty()) {
                     internalSdPath.setSummary(externalSd);
                     internalSdPath.setText(externalSd);
                     prefs.edit().putString("internal_sdcard_path", externalSd).apply();
