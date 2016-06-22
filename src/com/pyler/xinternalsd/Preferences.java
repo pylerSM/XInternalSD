@@ -1,10 +1,5 @@
 package com.pyler.xinternalsd;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -22,172 +17,178 @@ import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
 public class Preferences extends Activity {
-	public static Context context;
-	public static SharedPreferences prefs;
+    public static Context context;
+    public static SharedPreferences prefs;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-		context = getApplicationContext();
-		getFragmentManager().beginTransaction()
-				.replace(android.R.id.content, new Settings()).commit();
-	}
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        context = getApplicationContext();
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new Settings()).commit();
+    }
 
-	@SuppressWarnings("deprecation")
-	public static class Settings extends PreferenceFragment {
-		@Override
-		public void onCreate(Bundle savedInstanceState) {
-			super.onCreate(savedInstanceState);
-			getPreferenceManager()
-					.setSharedPreferencesMode(MODE_WORLD_READABLE);
-			addPreferencesFromResource(R.xml.preferences);
-			prefs = PreferenceManager.getDefaultSharedPreferences(context);
-			PreferenceCategory appSettings = (PreferenceCategory) findPreference("app_settings");
-			Preference externalSdCardFullAccess = findPreference("external_sdcard_full_access");
-			EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sdcard_path");
-			Preference includeSystemApps = findPreference("include_system_apps");
-			includeSystemApps
-					.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-						@Override
-						public boolean onPreferenceChange(
-								Preference preference, Object newValue) {
-							reloadAppsList();
-							return true;
-						}
-					});
-			if (Build.VERSION.SDK_INT >= 23) {
-				externalSdCardFullAccess.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-					@Override
-					public boolean onPreferenceChange(Preference preference, Object newValue) {
-						Toast.makeText(context, R.string.reboot_required, Toast.LENGTH_LONG).show();
-						return true;
-					}
-				});
-			}
-
-			reloadAppsList();
-
-			String customInternalSd = prefs.getString("internal_sdcard_path",
-					"");
-			if (!customInternalSd.isEmpty()) { // not empty
-				internalSdPath.setSummary(customInternalSd);
-			}
-                        else { // empty, try to detect it
-	                        String externalSd = "";
-	                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { 
-	                        	File[] dirs = getExternalMediaDirs();
-				        for (File dir : dirs) {
-				         	if (Environment.isExternalStorageRemovable(dir)) {
-				                	String absolutePath = dir.getAbsolutePath();
-				                        int end = absolutePath.indexOf("/Android/");
-				                        externalSd = absolutePath.substring(0, end);
-				                }
-					}
-	                        } else {
-					String externalStorage = System.getenv("SECONDARY_STORAGE");
-					if (externalStorage != null && !externalStorage.isEmpty()) {
-						externalSd = externalStorage.split(":")[0];
-					}
-	                        }
-	                        
-	                        if (!externalSd.isEmpty()) {
-		                        internalSdPath.setSummary(externalSd);
-					internalSdPath.setText(externalSd);
-					prefs.edit().putString("internal_sdcard_path", externalSd).apply();
-	                        }
+    @SuppressWarnings("deprecation")
+    public static class Settings extends PreferenceFragment {
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
+            getPreferenceManager()
+                    .setSharedPreferencesMode(MODE_WORLD_READABLE);
+            addPreferencesFromResource(R.xml.preferences);
+            prefs = PreferenceManager.getDefaultSharedPreferences(context);
+            PreferenceCategory appSettings = (PreferenceCategory) findPreference("app_settings");
+            Preference externalSdCardFullAccess = findPreference("external_sdcard_full_access");
+            EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sdcard_path");
+            Preference includeSystemApps = findPreference("include_system_apps");
+            includeSystemApps
+                    .setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                        @Override
+                        public boolean onPreferenceChange(
+                                Preference preference, Object newValue) {
+                            reloadAppsList();
+                            return true;
                         }
+                    });
+            if (Build.VERSION.SDK_INT >= 23) {
+                externalSdCardFullAccess.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                    @Override
+                    public boolean onPreferenceChange(Preference preference, Object newValue) {
+                        Toast.makeText(context, R.string.reboot_required, Toast.LENGTH_LONG).show();
+                        return true;
+                    }
+                });
+            }
 
-			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-				appSettings.removePreference(externalSdCardFullAccess);
-			}
-		}
-		
-		@Override
-        	public void onPause() {
-            		super.onPause();
+            reloadAppsList();
 
-            		// Set preferences file permissions to be world readable
-            		File prefsDir = new File(getActivity().getApplicationInfo().dataDir, "shared_prefs");
-            		File prefsFile = new File(prefsDir, getPreferenceManager().getSharedPreferencesName() + ".xml");
-            		if (prefsFile.exists()) {
-                		prefsFile.setReadable(true, false);
-            		}
-		}
+            String customInternalSd = prefs.getString("internal_sdcard_path",
+                    "");
+            if (!customInternalSd.isEmpty()) { // not empty
+                internalSdPath.setSummary(customInternalSd);
+            } else { // empty, try to detect it
+                String externalSd = "";
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    File[] dirs = context.getExternalMediaDirs();
+                    for (File dir : dirs) {
+                        if (Environment.isExternalStorageRemovable(dir)) {
+                            String absolutePath = dir.getAbsolutePath();
+                            int end = absolutePath.indexOf("/Android/");
+                            externalSd = absolutePath.substring(0, end);
+                        }
+                    }
+                } else {
+                    String externalStorage = System.getenv("SECONDARY_STORAGE");
+                    if (externalStorage != null && !externalStorage.isEmpty()) {
+                        externalSd = externalStorage.split(":")[0];
+                    }
+                }
 
-		public void reloadAppsList() {
-			new LoadApps().execute();
-		}
+                if (!externalSd.isEmpty()) {
+                    internalSdPath.setSummary(externalSd);
+                    internalSdPath.setText(externalSd);
+                    prefs.edit().putString("internal_sdcard_path", externalSd).apply();
+                }
+            }
 
-		public boolean isAllowedApp(ApplicationInfo appInfo) {
-			boolean isAllowedApp = true;
-			boolean includeSystemApps = prefs.getBoolean("include_system_apps",
-					false);
-			if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
-					&& !includeSystemApps) {
-				isAllowedApp = false;
-			}
-			return isAllowedApp;
-		}
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                appSettings.removePreference(externalSdCardFullAccess);
+            }
+        }
 
-		public class LoadApps extends AsyncTask<Void, Void, Void> {
-			MultiSelectListPreference enabledApps = (MultiSelectListPreference) findPreference("enable_for_apps");
-			MultiSelectListPreference disabledApps = (MultiSelectListPreference) findPreference("disable_for_apps");
-			List<CharSequence> appNames = new ArrayList<CharSequence>();
-			List<CharSequence> packageNames = new ArrayList<CharSequence>();
-			PackageManager pm = context.getPackageManager();
-			List<ApplicationInfo> packages = pm
-					.getInstalledApplications(PackageManager.GET_META_DATA);
+        @Override
+        public void onPause() {
+            super.onPause();
 
-			@Override
-			protected void onPreExecute() {
-				enabledApps.setEnabled(false);
-				disabledApps.setEnabled(false);
-			}
+            // Set preferences file permissions to be world readable
+            File prefsDir = new File(getActivity().getApplicationInfo().dataDir, "shared_prefs");
+            File prefsFile = new File(prefsDir, getPreferenceManager().getSharedPreferencesName() + ".xml");
+            if (prefsFile.exists()) {
+                prefsFile.setReadable(true, false);
+            }
+        }
 
-			@Override
-			protected Void doInBackground(Void... arg0) {
-				List<String[]> sortedApps = new ArrayList<String[]>();
+        public void reloadAppsList() {
+            new LoadApps().execute();
+        }
 
-				for (ApplicationInfo app : packages) {
-					if (isAllowedApp(app)) {
-						sortedApps.add(new String[] {
-								app.packageName,
-								app.loadLabel(context.getPackageManager())
-										.toString() });
-					}
-				}
+        public boolean isAllowedApp(ApplicationInfo appInfo) {
+            boolean isAllowedApp = true;
+            boolean includeSystemApps = prefs.getBoolean("include_system_apps",
+                    false);
+            if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
+                    && !includeSystemApps) {
+                isAllowedApp = false;
+            }
+            return isAllowedApp;
+        }
 
-				Collections.sort(sortedApps, new Comparator<String[]>() {
-					@Override
-					public int compare(String[] entry1, String[] entry2) {
-						return entry1[1].compareToIgnoreCase(entry2[1]);
-					}
-				});
+        public class LoadApps extends AsyncTask<Void, Void, Void> {
+            MultiSelectListPreference enabledApps = (MultiSelectListPreference) findPreference("enable_for_apps");
+            MultiSelectListPreference disabledApps = (MultiSelectListPreference) findPreference("disable_for_apps");
+            List<CharSequence> appNames = new ArrayList<CharSequence>();
+            List<CharSequence> packageNames = new ArrayList<CharSequence>();
+            PackageManager pm = context.getPackageManager();
+            List<ApplicationInfo> packages = pm
+                    .getInstalledApplications(PackageManager.GET_META_DATA);
 
-				for (int i = 0; i < sortedApps.size(); i++) {
-					appNames.add(sortedApps.get(i)[1]);
-					packageNames.add(sortedApps.get(i)[0]);
-				}
+            @Override
+            protected void onPreExecute() {
+                enabledApps.setEnabled(false);
+                disabledApps.setEnabled(false);
+            }
 
-				return null;
-			}
+            @Override
+            protected Void doInBackground(Void... arg0) {
+                List<String[]> sortedApps = new ArrayList<String[]>();
 
-			@Override
-			protected void onPostExecute(Void result) {
-				CharSequence[] appNamesList = appNames
-						.toArray(new CharSequence[appNames.size()]);
-				CharSequence[] packageNamesList = packageNames
-						.toArray(new CharSequence[packageNames.size()]);
+                for (ApplicationInfo app : packages) {
+                    if (isAllowedApp(app)) {
+                        sortedApps.add(new String[]{
+                                app.packageName,
+                                app.loadLabel(context.getPackageManager())
+                                        .toString()});
+                    }
+                }
 
-				enabledApps.setEntries(appNamesList);
-				enabledApps.setEntryValues(packageNamesList);
-				enabledApps.setEnabled(true);
-				disabledApps.setEntries(appNamesList);
-				disabledApps.setEntryValues(packageNamesList);
-				disabledApps.setEnabled(true);
-			}
-		}
+                Collections.sort(sortedApps, new Comparator<String[]>() {
+                    @Override
+                    public int compare(String[] entry1, String[] entry2) {
+                        return entry1[1].compareToIgnoreCase(entry2[1]);
+                    }
+                });
 
-	}
+                for (int i = 0; i < sortedApps.size(); i++) {
+                    appNames.add(sortedApps.get(i)[1]);
+                    packageNames.add(sortedApps.get(i)[0]);
+                }
+
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void result) {
+                CharSequence[] appNamesList = appNames
+                        .toArray(new CharSequence[appNames.size()]);
+                CharSequence[] packageNamesList = packageNames
+                        .toArray(new CharSequence[packageNames.size()]);
+
+                enabledApps.setEntries(appNamesList);
+                enabledApps.setEntryValues(packageNamesList);
+                enabledApps.setEnabled(true);
+                disabledApps.setEntries(appNamesList);
+                disabledApps.setEntryValues(packageNamesList);
+                disabledApps.setEnabled(true);
+            }
+        }
+
+    }
 }
