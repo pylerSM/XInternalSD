@@ -106,7 +106,7 @@ public class Preferences extends Activity {
                     }
                 }
 
-                if (!externalSd.isEmpty()) {
+                if (externalSd != null || !externalSd.isEmpty()) {
                     internalSdPath.setSummary(externalSd);
                     internalSdPath.setText(externalSd);
                     prefs.edit().putString("internal_sdcard_path", externalSd).apply();
