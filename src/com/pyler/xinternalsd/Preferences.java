@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.EditTextPreference;
 import android.preference.MultiSelectListPreference;
 import android.preference.Preference;
@@ -55,11 +56,11 @@ public class Preferences extends Activity {
 							return true;
 						}
 					});
-			if (Build.VERSION.SDK_INT == 23) {
+			if (Build.VERSION.SDK_INT >= 23) {
 				externalSdCardFullAccess.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
 					@Override
 					public boolean onPreferenceChange(Preference preference, Object newValue) {
-						Toast.makeText(context, "Reboot is required for changes to take effect.", Toast.LENGTH_SHORT).show();
+						Toast.makeText(context, R.string.reboot_required, Toast.LENGTH_LONG).show();
 						return true;
 					}
 				});
@@ -69,23 +70,49 @@ public class Preferences extends Activity {
 
 			String customInternalSd = prefs.getString("internal_sdcard_path",
 					"");
-			if (!customInternalSd.isEmpty()) {
+			if (!customInternalSd.isEmpty()) { // not empty
 				internalSdPath.setSummary(customInternalSd);
 			}
-
-			String externalStorage = System.getenv("SECONDARY_STORAGE");
-			if (externalStorage != null && !externalStorage.isEmpty()
-					&& customInternalSd.isEmpty()) {
-				String externalSd = externalStorage.split(":")[0];
-				internalSdPath.setSummary(externalSd);
-				internalSdPath.setText(externalSd);
-				prefs.edit().putString("internal_sdcard_path", externalSd)
-						.apply();
-			}
+                        else { // empty, try to detect it
+	                        String externalSd = "";
+	                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) { 
+	                        	File[] dirs = getExternalMediaDirs();
+				        for (File dir : dirs) {
+				         	if (Environment.isExternalStorageRemovable(dir)) {
+				                	String absolutePath = dir.getAbsolutePath();
+				                        int end = absolutePath.indexOf("/Android/");
+				                        externalSd = absolutePath.substring(0, end);
+				                }
+					}
+	                        } else {
+					String externalStorage = System.getenv("SECONDARY_STORAGE");
+					if (externalStorage != null && !externalStorage.isEmpty()) {
+						externalSd = externalStorage.split(":")[0];
+					}
+	                        }
+	                        
+	                        if (!externalSd.isEmpty()) {
+		                        internalSdPath.setSummary(externalSd);
+					internalSdPath.setText(externalSd);
+					prefs.edit().putString("internal_sdcard_path", externalSd).apply();
+	                        }
+                        }
 
 			if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
 				appSettings.removePreference(externalSdCardFullAccess);
 			}
+		}
+		
+		@Override
+        	public void onPause() {
+            		super.onPause();
+
+            		// Set preferences file permissions to be world readable
+            		File prefsDir = new File(getActivity().getApplicationInfo().dataDir, "shared_prefs");
+            		File prefsFile = new File(prefsDir, getPreferenceManager().getSharedPreferencesName() + ".xml");
+            		if (prefsFile.exists()) {
+                		prefsFile.setReadable(true, false);
+            		}
 		}
 
 		public void reloadAppsList() {
