@@ -89,7 +89,7 @@ public class Preferences extends Activity {
             if (!customInternalSd.isEmpty()) { // not empty
                 internalSdPath.setSummary(customInternalSd);
             } else { // empty, try to detect it
-                String externalSd = "";
+                String externalSd = null;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     File[] dirs = context.getExternalMediaDirs();
                     for (File dir : dirs) {
