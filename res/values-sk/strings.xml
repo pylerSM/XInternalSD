@@ -10,5 +10,6 @@
     <string name="enter_internal_sdcard_path">Zadajte cestu k internej karte SD</string>
     <string name="external_sdcard_full_access">Plný prístup ku externej karte SD</string>
     <string name="include_system_apps">Zahrnúť systémové aplikácie</string>
+    <string name="reboot_required">Vyžaduje sa reštart zariadenia pre použitie nového nastavenia.</string>
 
 </resources>

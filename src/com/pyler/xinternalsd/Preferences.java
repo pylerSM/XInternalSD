@@ -49,6 +49,20 @@ public class Preferences extends Activity {
             Preference externalSdCardFullAccess = findPreference("external_sdcard_full_access");
             EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sdcard_path");
             Preference includeSystemApps = findPreference("include_system_apps");
+
+            internalSdPath.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(
+                        Preference preference, Object newValue) {
+                    String newPath = (String) newValue;
+                    if (newPath.isEmpty()) {
+                        newPath = getString(R.string.enter_internal_sdcard_path);
+                    }
+                    preference.setSummary(newPath);
+                    return true;
+                }
+            });
+
             includeSystemApps
                     .setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                         @Override
