@@ -19,6 +19,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.widget.Toast;
 
 public class Preferences extends Activity {
 	public static Context context;
@@ -54,6 +55,15 @@ public class Preferences extends Activity {
 							return true;
 						}
 					});
+			if (Build.VERSION.SDK_INT == 23) {
+				externalSdCardFullAccess.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+					@Override
+					public boolean onPreferenceChange(Preference preference, Object newValue) {
+						Toast.makeText(context, "Reboot is required for changes to take effect.", Toast.LENGTH_SHORT).show();
+						return true;
+					}
+				});
+			}
 
 			reloadAppsList();
 
