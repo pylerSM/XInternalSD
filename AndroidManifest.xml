@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pyler.xinternalsd"
-    android:versionCode="410"
-    android:versionName="4.1" >
+    android:versionCode="415"
+    android:versionName="4.2-beta1" >
 
     <uses-sdk
         android:minSdkVersion="15"
