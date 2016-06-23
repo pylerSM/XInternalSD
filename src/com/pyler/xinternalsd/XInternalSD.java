@@ -134,7 +134,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
         if ("android".equals(lpparam.packageName)
                 && "android".equals(lpparam.processName)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-               externalSdCardAccessHook(lpparam);
+                externalSdCardAccessHook(lpparam);
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1) {
                 XposedHelpers.findAndHookMethod(
                         XposedHelpers.findClass(
@@ -152,15 +152,20 @@ public class XInternalSD implements IXposedHookZygoteInit,
         }
 
         if (!detectedSdPath) {
-            File internalSdPath = Environment.getExternalStorageDirectory();
-            internalSd = internalSdPath.getPath();
-            detectedSdPath = true;
+            try {
+                File internalSdPath = Environment.getExternalStorageDirectory();
+                internalSd = internalSdPath.getPath();
+                detectedSdPath = true;
+            } catch (NullPointerException npe) {
+                // nothing
+            }
         }
 
         if (!isEnabledApp(lpparam)) {
             return;
 
         }
+
         XposedHelpers.findAndHookMethod(Environment.class,
                 "getExternalStorageDirectory", getExternalStorageDirectoryHook);
         XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
@@ -183,8 +188,8 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
     void externalSdCardAccessHook(LoadPackageParam lpparam) {
         prefs.reload();
-        boolean sdAccess = prefs.getBoolean("external_sdcard_full_access", true);
-        if (sdAccess) {
+        boolean externalSdCardFullAccess = prefs.getBoolean("external_sdcard_full_access", true);
+        if (externalSdCardFullAccess) {
             final Class<?> pmste = XposedHelpers.findClass("com.android.server.pm.PermissionsState", lpparam.classLoader);
             final Class<?> pmngr = XposedHelpers.findClass("android.content.pm.PackageManager", lpparam.classLoader);
             final Class<?> usrmngr = XposedHelpers.findClass("com.android.server.pm.UserManagerService", lpparam.classLoader);
@@ -312,7 +317,12 @@ public class XInternalSD implements IXposedHookZygoteInit,
         if (customInternalSd.isEmpty()) {
             return;
         }
-        String newDir = oldDirPath.getPath().replaceFirst(getInternalSd(),
+
+        if (internalSd.isEmpty()) {
+            return;
+        }
+
+        String newDir = oldDirPath.getPath().replaceFirst(internalSd,
                 customInternalSd);
         File newDirPath = new File(newDir);
         if (!newDirPath.exists()) {
@@ -333,7 +343,12 @@ public class XInternalSD implements IXposedHookZygoteInit,
         if (customInternalSd.isEmpty()) {
             return;
         }
-        String newDir = oldDirPaths[0].getPath().replaceFirst(getInternalSd(),
+
+        if (internalSd.isEmpty()) {
+            return;
+        }
+
+        String newDir = oldDirPaths[0].getPath().replaceFirst(internalSd,
                 customInternalSd);
         File newDirPath = new File(newDir);
         if (newDirPaths.contains(newDirPath)) {
@@ -350,13 +365,10 @@ public class XInternalSD implements IXposedHookZygoteInit,
     public String getCustomInternalSd() {
         prefs.reload();
         String customInternalSd = prefs.getString("internal_sdcard_path",
-                getInternalSd());
+                internalSd);
         return customInternalSd;
     }
 
-    public String getInternalSd() {
-        return internalSd;
-    }
 
     public boolean isAllowedApp(ApplicationInfo appInfo) {
         prefs.reload();
