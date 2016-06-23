@@ -10,5 +10,6 @@
     <string name="enter_internal_sdcard_path">内部ストレージパスを入力してください</string>
     <string name="external_sdcard_full_access">外部ストレージへのフルアクセス</string>
     <string name="include_system_apps">システムアプリを含める</string>
+    <string name="reboot_required">変更を有効にするにはデバイスの再起動が必要です。</string>
 
 </resources>

@@ -10,5 +10,6 @@
     <string name="enter_internal_sdcard_path">輸入內置SD卡路徑</string>
     <string name="external_sdcard_full_access">取得外置SD卡完整讀寫權限</string>
     <string name="include_system_apps">包含系統應用程式</string>
+    <string name="reboot_required">設備重啟需要更改生效</string>
 
 </resources>
