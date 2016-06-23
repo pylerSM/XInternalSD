@@ -30,6 +30,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
     public XC_MethodHook getObbDirHook;
     public XC_MethodHook getExternalStoragePublicDirectoryHook;
     public XC_MethodHook getExternalFilesDirsHook;
+    public XC_MethodHook getObbDirsHook;
     public XC_MethodHook externalSdCardAccessHook;
     boolean detectedSdPath = false;
 
@@ -83,7 +84,15 @@ public class XInternalSD implements IXposedHookZygoteInit,
             @Override
             protected void afterHookedMethod(MethodHookParam param)
                     throws Throwable {
-                appendDirPath(param);
+                changeDirsPath(param);
+            }
+        };
+
+        getObbDirsHook = new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param)
+                    throws Throwable {
+                changeDirsPath(param);
             }
         };
 
@@ -183,6 +192,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
                     "android.app.ContextImpl", lpparam.classLoader),
                     "getExternalFilesDirs", String.class,
                     getExternalFilesDirsHook);
+            XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+                    "android.app.ContextImpl", lpparam.classLoader),
+                    "getObbDirs", getObbDirsHook);
         }
     }
 
@@ -317,12 +329,13 @@ public class XInternalSD implements IXposedHookZygoteInit,
         if (customInternalSd.isEmpty()) {
             return;
         }
-
+        String internalSd = getInternalSd();
         if (internalSd.isEmpty()) {
             return;
         }
 
-        String newDir = oldDirPath.getPath().replaceFirst(internalSd,
+        String dir = appendFileSeparator(oldDirPath.getPath());
+        String newDir = dir.replaceFirst(internalSd,
                 customInternalSd);
         File newDirPath = new File(newDir);
         if (!newDirPath.exists()) {
@@ -331,44 +344,50 @@ public class XInternalSD implements IXposedHookZygoteInit,
         param.setResult(newDirPath);
     }
 
-    public void appendDirPath(MethodHookParam param) {
-        File[] oldDirPaths = (File[]) param.getResult();
-        ArrayList<File> newDirPaths = new ArrayList<File>();
-        for (File oldDirPath : oldDirPaths) {
-            if (oldDirPath != null) {
-                newDirPaths.add(oldDirPath);
-            }
-        }
+    public void changeDirsPath(MethodHookParam param) {
+        File[] dirPaths = (File[]) param.getResult();
         String customInternalSd = getCustomInternalSd();
         if (customInternalSd.isEmpty()) {
             return;
         }
-
+        String internalSd = getInternalSd();
         if (internalSd.isEmpty()) {
             return;
         }
 
-        String newDir = oldDirPaths[0].getPath().replaceFirst(internalSd,
+        String dir = appendFileSeparator(dirPaths[0].getPath());
+        String newDir = dir.replaceFirst(internalSd,
                 customInternalSd);
         File newDirPath = new File(newDir);
-        if (newDirPaths.contains(newDirPath)) {
-            newDirPaths.add(newDirPath);
-        }
+
         if (!newDirPath.exists()) {
             newDirPath.mkdirs();
         }
-        File[] appendedDirPaths = newDirPaths.toArray(new File[newDirPaths
-                .size()]);
-        param.setResult(appendedDirPaths);
+
+        dirPaths[0] = newDirPath;
+        param.setResult(dirPaths);
     }
+
 
     public String getCustomInternalSd() {
         prefs.reload();
         String customInternalSd = prefs.getString("internal_sdcard_path",
-                internalSd);
+                getInternalSd());
+        appendFileSeparator(customInternalSd);
         return customInternalSd;
     }
 
+    public String getInternalSd() {
+        internalSd = appendFileSeparator(internalSd);
+        return internalSd;
+    }
+
+    public String appendFileSeparator(String path) {
+        if (!path.endsWith(File.separator)) {
+            path += File.separator;
+        }
+        return path;
+    }
 
     public boolean isAllowedApp(ApplicationInfo appInfo) {
         prefs.reload();

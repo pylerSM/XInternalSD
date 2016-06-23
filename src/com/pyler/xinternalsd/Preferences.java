@@ -50,6 +50,14 @@ public class Preferences extends Activity {
             EditTextPreference internalSdPath = (EditTextPreference) findPreference("internal_sdcard_path");
             Preference includeSystemApps = findPreference("include_system_apps");
 
+            String internalSd = prefs.getString("internal_sdcard_path", "");
+            if (!internalSd.isEmpty()) {
+                internalSd = appendFileSeparator(internalSd);
+                internalSdPath.setText(internalSd);
+            }
+
+            Toast.makeText(context, "getExternalStorageDirectory: " + Environment.getExternalStorageDirectory()  + "\ngetExternalStoragePublicDirectory: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "\ngetObbDir" + context.getObbDir() +  "\ngetObbDirs" + Arrays.toString(context.getObbDirs()) + "\ngetExternalFilesDir" + context.getExternalFilesDir(null) + "\ngetExternalFilesDirs" + Arrays.toString(context.getExternalFilesDirs(null)), Toast.LENGTH_LONG).show();
+
             internalSdPath.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
                 public boolean onPreferenceChange(
@@ -57,6 +65,10 @@ public class Preferences extends Activity {
                     String newPath = (String) newValue;
                     if (newPath.isEmpty()) {
                         newPath = getString(R.string.enter_internal_sdcard_path);
+                        preference.setSummary(newPath);
+                    }
+                    else {
+                        newPath = appendFileSeparator(newPath);
                     }
                     preference.setSummary(newPath);
                     return true;
@@ -132,6 +144,13 @@ public class Preferences extends Activity {
 
         public void reloadAppsList() {
             new LoadApps().execute();
+        }
+
+        public String appendFileSeparator(String path) {
+            if (!path.endsWith(File.separator)) {
+                path += File.separator;
+            }
+            return path;
         }
 
         public boolean isAllowedApp(ApplicationInfo appInfo) {
