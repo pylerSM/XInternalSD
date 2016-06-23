@@ -305,6 +305,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
 
     public void changeDirPath(MethodHookParam param) {
         File oldDirPath = (File) param.getResult();
+        if (oldDirPath == null) {
+            return;
+        }
         String customInternalSd = getCustomInternalSd();
         if (customInternalSd.isEmpty()) {
             return;
