@@ -159,7 +159,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
         if ("android".equals(lpparam.packageName)
                 && "android".equals(lpparam.processName)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                /*externalSdCardAccessHook(lpparam);*/
                 XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
                         "com.android.server.pm.PackageManagerService",
                         lpparam.classLoader), "grantPermissionsLPw",
