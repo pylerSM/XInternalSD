@@ -1,0 +1,15 @@
+<resources>
+
+    <string name="app_description">आंतरिक एसडी कार्ड के लिए बदल पथ</string>
+    <string name="app_settings">सेटिंग्स</string>
+    <string name="custom_internal_sdcard_path">आंतरिक एसडी कार्ड के लिए अनुकूलित पथ</string>
+    <string name="internal_sdcard_path">आंतरिक एसडी कार्ड के लिए पथ</string>
+    <string name="enable_for_apps">ऐप्स के लिए चालू</string>
+    <string name="enable_for_all_apps">हर ऐप के लिए चालू</string>
+    <string name="disable_for_apps">ऐप्स के लिए बंद</string>
+    <string name="enter_internal_sdcard_path">आंतरिक एसडी कार्ड के लिए पथ दर्ज करें</string>
+    <string name="external_sdcard_full_access">बाहरी एसडी कार्ड का पूरा उपयोग</string>
+    <string name="include_system_apps">सिस्टम ऐप्स शामिल</string>
+    <string name="reboot_required">परिवर्तनो को लागु होने के लिए डिवाइस को रिबूट करे</string>
+
+</resources>

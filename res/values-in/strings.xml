@@ -1,0 +1,15 @@
+<resources>
+
+    <string name="app_description">Ubah jalur ke kartu SD internal</string>
+    <string name="app_settings">Pengaturan</string>
+    <string name="custom_internal_sdcard_path">Jalur khusus ke kartu SD internal</string>
+    <string name="internal_sdcard_path">Jalur ke kartu SD internal</string>
+    <string name="enable_for_apps">Nyalakan untuk aplikasi</string>
+    <string name="enable_for_all_apps">Nyalakan untuk semua aplikasi</string>
+    <string name="disable_for_apps">Matikan untuk aplikasi</string>
+    <string name="enter_internal_sdcard_path">Masukkan jalur ke kartu SD internal</string>
+    <string name="external_sdcard_full_access">Akses penuh ke kartu SD eksternal</string>
+    <string name="include_system_apps">Termasuk aplikasi sistem</string>
+    <string name="reboot_required">Diperlukan reboot perangkat untuk menerapkan perubahan.</string>
+
+</resources>
