@@ -5,13 +5,10 @@ import android.os.Build;
 import android.os.Environment;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import de.robv.android.xposed.IXposedHookLoadPackage;
@@ -24,11 +21,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XInternalSD implements IXposedHookZygoteInit,
         IXposedHookLoadPackage {
-    private static final String TAG_PERMISSIONS = "perms";
-    private static final String TAG_ITEM = "item";
-    private static final String ATTR_NAME = "name";
-    private static final String ATTR_GRANTED = "granted";
-    private static final String ATTR_FLAGS = "flags";
     public XSharedPreferences prefs;
     public String internalSd;
     public XC_MethodHook getExternalStorageDirectoryHook;
@@ -37,9 +29,8 @@ public class XInternalSD implements IXposedHookZygoteInit,
     public XC_MethodHook getExternalStoragePublicDirectoryHook;
     public XC_MethodHook getExternalFilesDirsHook;
     public XC_MethodHook getObbDirsHook;
-    public XC_MethodHook externalSdCardAccessHook;
-    public String packageName;
-    public ArrayList<String> addedPermissions = new ArrayList<String>();
+    public XC_MethodHook externalSdCardAccessHook; // 4.4 - 5.0
+    public XC_MethodHook externalSdCardAccessHook2; // 6.0 and up
     boolean detectedSdPath = false;
 
     @Override
@@ -107,10 +98,10 @@ public class XInternalSD implements IXposedHookZygoteInit,
                 if (!externalSdCardFullAccess) {
                     return;
                 }
-                if (permission
-                        .equals("android.permission.WRITE_EXTERNAL_STORAGE")
-                        || permission
-                        .equals("android.permission.ACCESS_ALL_EXTERNAL_STORAGE")) {
+                if (Common.PERM_WRITE_MEDIA_STORAGE
+                        .equals(permission)
+                        || Common.PERM_ACCESS_ALL_EXTERNAL_STORAGE
+                        .equals(permission)) {
                     Class<?> process = XposedHelpers.findClass(
                             "android.os.Process", null);
                     int gid = (Integer) XposedHelpers.callStaticMethod(process,
@@ -134,6 +125,31 @@ public class XInternalSD implements IXposedHookZygoteInit,
                 }
             }
         };
+
+
+        externalSdCardAccessHook2 = new XC_MethodHook() {
+            @Override
+            protected void afterHookedMethod(MethodHookParam param)
+                    throws Throwable {
+                prefs.reload();
+                boolean externalSdCardFullAccess = prefs.getBoolean(
+                        "external_sdcard_full_access", true);
+                if (!externalSdCardFullAccess) {
+                    return;
+                }
+                Object extras = XposedHelpers.getObjectField(param.args[0], "mExtras");
+                Object ps = XposedHelpers.callMethod(extras, "getPermissionsState");
+                Object settings = XposedHelpers.getObjectField(param.thisObject, "mSettings");
+                Object permissions = XposedHelpers.getObjectField(settings, "mPermissions");
+                boolean hasPermission = (boolean) XposedHelpers.callMethod(ps, "hasInstallPermission", Common.PERM_WRITE_MEDIA_STORAGE);
+                if (!hasPermission) {
+                    Object permWriteMediaStorage = XposedHelpers.callMethod(permissions, "get",
+                            Common.PERM_WRITE_MEDIA_STORAGE);
+                    XposedHelpers.callMethod(ps, "grantInstallPermission", permWriteMediaStorage);
+                }
+
+            }
+        };
     }
 
     @SuppressWarnings("unchecked")
@@ -143,7 +159,11 @@ public class XInternalSD implements IXposedHookZygoteInit,
         if ("android".equals(lpparam.packageName)
                 && "android".equals(lpparam.processName)) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                externalSdCardAccessHook(lpparam);
+                /*externalSdCardAccessHook(lpparam);*/
+                XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
+                        "com.android.server.pm.PackageManagerService",
+                        lpparam.classLoader), "grantPermissionsLPw",
+                        Common.CLASS_PACKAGE_PARSER_PACKAGE, boolean.class, String.class, externalSdCardAccessHook2);
             } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP || Build.VERSION.SDK_INT == Build.VERSION_CODES.LOLLIPOP_MR1) {
                 XposedHelpers.findAndHookMethod(
                         XposedHelpers.findClass(
@@ -196,97 +216,6 @@ public class XInternalSD implements IXposedHookZygoteInit,
                     "android.app.ContextImpl", lpparam.classLoader),
                     "getObbDirs", getObbDirsHook);
         }
-    }
-
-    void externalSdCardAccessHook(LoadPackageParam lpparam) {
-        prefs.reload();
-        boolean externalSdCardFullAccess = prefs.getBoolean("external_sdcard_full_access", true);
-        if (externalSdCardFullAccess) {
-            final Class<?> pmste = XposedHelpers.findClass("com.android.server.pm.PermissionsState", lpparam.classLoader);
-            final Class<?> pmngr = XposedHelpers.findClass("android.content.pm.PackageManager", lpparam.classLoader);
-            final Class<?> usrmngr = XposedHelpers.findClass("com.android.server.pm.UserManagerService", lpparam.classLoader);
-
-            XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
-                    "com.android.server.pm.PackageManagerService",
-                    lpparam.classLoader), "grantPermissionsLPw", "android.content.pm.PackageParser$Package", boolean.class, String.class, new XC_MethodHook() {
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    Object Settings = XposedHelpers.getObjectField(param.thisObject, "mSettings");
-                    Object mPermissions = XposedHelpers.getObjectField(Settings, "mPermissions");
-
-                    ArrayList<String> requestedPermissions = (ArrayList<String>) XposedHelpers.getObjectField(param.args[0], "requestedPermissions");
-
-                    if (!requestedPermissions.contains("android.permission.WRITE_MEDIA_STORAGE")) {
-                        Object bp = XposedHelpers.callMethod(mPermissions, "get", "android.permission.WRITE_MEDIA_STORAGE");
-                        if (bp != null) {
-                            final Object ps = XposedHelpers.getObjectField(param.args[0], "mExtras");
-                            Object permissionsState = XposedHelpers.callMethod(ps, "getPermissionsState");
-                            Object origPermissions = permissionsState;
-                            Object UserManagerService = XposedHelpers.callStaticMethod(usrmngr, "getInstance");
-                            int[] getUserIds = (int[]) XposedHelpers.callMethod(UserManagerService, "getUserIds");
-                            for (int userId : getUserIds) {
-                                String namep = (String) XposedHelpers.getObjectField(bp, "name");
-                                Object permstate = XposedHelpers.callMethod(origPermissions, "getRuntimePermissionState", namep, userId);
-                                if (permstate != null) {
-                                    XposedHelpers.callMethod(origPermissions, "revokeRuntimePermission", bp, userId);
-                                    int MASK_PERMISSION_FLAGS = XposedHelpers.getStaticIntField(pmngr, "MASK_PERMISSION_FLAGS");
-                                    XposedHelpers.callMethod(origPermissions, "updatePermissionFlags", bp, userId, MASK_PERMISSION_FLAGS, 0);
-                                }
-                            }
-                            int grantInstallPermission = (int) XposedHelpers.callMethod(permissionsState, "grantInstallPermission", bp);
-                            int PERMISSION_OPERATION_FAILURE = XposedHelpers.getStaticIntField(pmste, "PERMISSION_OPERATION_FAILURE");
-                            if (grantInstallPermission != PERMISSION_OPERATION_FAILURE) {
-                            }
-                            String pName = (String) XposedHelpers.getObjectField(bp, "name");
-                            String packageName = (String) XposedHelpers.getObjectField(param.args[0], "packageName");
-                            if (!addedPermissions.contains(packageName + "+" + pName)) {
-                                addedPermissions.add(packageName + "+" + pName);
-                            }
-                        }
-                    }
-                }
-            });
-
-            XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
-                    "com.android.server.pm.Settings",
-                    lpparam.classLoader), "writePackageLPr", XmlSerializer.class, "com.android.server.pm.PackageSetting", new XC_MethodHook() {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    packageName = (String) XposedHelpers.getObjectField(param.args[1], "name");
-
-                }
-            });
-
-            XposedHelpers.findAndHookMethod(XposedHelpers.findClass(
-                    "com.android.server.pm.Settings",
-                    lpparam.classLoader), "writePermissionsLPr", XmlSerializer.class, List.class, new XC_MethodHook() {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    List<Object> permissionStates = (List<Object>) param.args[1];
-                    XmlSerializer serializer = (XmlSerializer) param.args[0];
-                    if (permissionStates.isEmpty()) {
-                        return;
-                    }
-
-                    serializer.startTag(null, TAG_PERMISSIONS);
-                    for (Object permissionState : permissionStates) {
-
-                        String permName = String.valueOf(XposedHelpers.callMethod(permissionState, "getName"));
-                        if (!addedPermissions.contains(packageName + "+" + permName)) {
-                            serializer.startTag(null, TAG_ITEM);
-                            serializer.attribute(null, ATTR_NAME, permName);
-                            serializer.attribute(null, ATTR_GRANTED, String.valueOf(XposedHelpers.callMethod(permissionState, "isGranted")));
-                            serializer.attribute(null, ATTR_FLAGS, Integer.toHexString((int) XposedHelpers.callMethod(permissionState, "getFlags")));
-                            serializer.endTag(null, TAG_ITEM);
-                        }
-
-                    }
-                    serializer.endTag(null, TAG_PERMISSIONS);
-                    param.setResult(null);
-                }
-            });
-        }
-
     }
 
     public boolean isEnabledApp(LoadPackageParam lpparam) {
