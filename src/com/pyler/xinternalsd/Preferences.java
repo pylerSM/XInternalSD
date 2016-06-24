@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Preferences extends Activity {
-    public static final String[] MTP_APPS = {"com.android.MtpApplication", "com.samsung.android.MtpApplication"};
     public static Context context;
     public static SharedPreferences prefs;
 
@@ -53,7 +52,7 @@ public class Preferences extends Activity {
 
             String internalSd = prefs.getString("internal_sdcard_path", "");
             if (!internalSd.isEmpty()) {
-                internalSd = appendFileSeparator(internalSd);
+                internalSd = Common.appendFileSeparator(internalSd);
                 internalSdPath.setSummary(internalSd);
                 internalSdPath.setText(internalSd);
             }
@@ -67,7 +66,7 @@ public class Preferences extends Activity {
                         newPath = getString(R.string.enter_internal_sdcard_path);
                         preference.setSummary(newPath);
                     } else {
-                        newPath = appendFileSeparator(newPath);
+                        newPath = Common.appendFileSeparator(newPath);
                     }
                     preference.setSummary(newPath);
                     return true;
@@ -118,7 +117,7 @@ public class Preferences extends Activity {
                 }
 
                 if (externalSd != null && !externalSd.isEmpty()) {
-                    externalSd = appendFileSeparator(externalSd);
+                    externalSd = Common.appendFileSeparator(externalSd);
                     internalSdPath.setSummary(externalSd);
                     internalSdPath.setText(externalSd);
                     prefs.edit().putString("internal_sdcard_path", externalSd).apply();
@@ -146,13 +145,6 @@ public class Preferences extends Activity {
             new LoadApps().execute();
         }
 
-        public String appendFileSeparator(String path) {
-            if (!path.endsWith(File.separator)) {
-                path += File.separator;
-            }
-            return path;
-        }
-
         public boolean isAllowedApp(ApplicationInfo appInfo) {
             boolean includeSystemApps = prefs.getBoolean("include_system_apps",
                     false);
@@ -161,7 +153,7 @@ public class Preferences extends Activity {
                 return false;
             }
 
-            if (Arrays.asList(MTP_APPS).contains(appInfo.packageName)) {
+            if (Arrays.asList(Common.MTP_APPS).contains(appInfo.packageName)) {
                 return false;
             }
             return true;

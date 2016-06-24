@@ -24,7 +24,6 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XInternalSD implements IXposedHookZygoteInit,
         IXposedHookLoadPackage {
-    public static final String[] MTP_APPS = {"com.android.MtpApplication", "com.samsung.android.MtpApplication"};
     private static final String TAG_PERMISSIONS = "perms";
     private static final String TAG_ITEM = "item";
     private static final String ATTR_NAME = "name";
@@ -335,7 +334,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
             return;
         }
 
-        String dir = appendFileSeparator(oldDirPath.getPath());
+        String dir = Common.appendFileSeparator(oldDirPath.getPath());
         String newDir = dir.replaceFirst(internalSd,
                 customInternalSd);
         File newDirPath = new File(newDir);
@@ -356,7 +355,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
             return;
         }
 
-        String dir = appendFileSeparator(dirPaths[0].getPath());
+        String dir = Common.appendFileSeparator(dirPaths[0].getPath());
         String newDir = dir.replaceFirst(internalSd,
                 customInternalSd);
         File newDirPath = new File(newDir);
@@ -369,25 +368,17 @@ public class XInternalSD implements IXposedHookZygoteInit,
         param.setResult(dirPaths);
     }
 
-
     public String getCustomInternalSd() {
         prefs.reload();
         String customInternalSd = prefs.getString("internal_sdcard_path",
                 getInternalSd());
-        appendFileSeparator(customInternalSd);
+        customInternalSd = Common.appendFileSeparator(customInternalSd);
         return customInternalSd;
     }
 
     public String getInternalSd() {
-        internalSd = appendFileSeparator(internalSd);
+        internalSd = Common.appendFileSeparator(internalSd);
         return internalSd;
-    }
-
-    public String appendFileSeparator(String path) {
-        if (!path.endsWith(File.separator)) {
-            path += File.separator;
-        }
-        return path;
     }
 
     public boolean isAllowedApp(ApplicationInfo appInfo) {
@@ -401,7 +392,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
                     && !includeSystemApps) {
                 return false;
             }
-            if (Arrays.asList(MTP_APPS).contains(appInfo.packageName)) {
+            if (Arrays.asList(Common.MTP_APPS).contains(appInfo.packageName)) {
                 return false;
             }
         }
