@@ -25,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Preferences extends Activity {
+    public static final String[] MTP_APPS = {"com.android.MtpApplication", "com.samsung.android.MtpApplication"};
     public static Context context;
     public static SharedPreferences prefs;
 
@@ -53,10 +54,9 @@ public class Preferences extends Activity {
             String internalSd = prefs.getString("internal_sdcard_path", "");
             if (!internalSd.isEmpty()) {
                 internalSd = appendFileSeparator(internalSd);
+                internalSdPath.setSummary(internalSd);
                 internalSdPath.setText(internalSd);
             }
-
-            Toast.makeText(context, "getExternalStorageDirectory: " + Environment.getExternalStorageDirectory()  + "\ngetExternalStoragePublicDirectory: " + Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS) + "\ngetObbDir" + context.getObbDir() +  "\ngetObbDirs" + Arrays.toString(context.getObbDirs()) + "\ngetExternalFilesDir" + context.getExternalFilesDir(null) + "\ngetExternalFilesDirs" + Arrays.toString(context.getExternalFilesDirs(null)), Toast.LENGTH_LONG).show();
 
             internalSdPath.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
                 @Override
@@ -66,8 +66,7 @@ public class Preferences extends Activity {
                     if (newPath.isEmpty()) {
                         newPath = getString(R.string.enter_internal_sdcard_path);
                         preference.setSummary(newPath);
-                    }
-                    else {
+                    } else {
                         newPath = appendFileSeparator(newPath);
                     }
                     preference.setSummary(newPath);
@@ -119,6 +118,7 @@ public class Preferences extends Activity {
                 }
 
                 if (externalSd != null && !externalSd.isEmpty()) {
+                    externalSd = appendFileSeparator(externalSd);
                     internalSdPath.setSummary(externalSd);
                     internalSdPath.setText(externalSd);
                     prefs.edit().putString("internal_sdcard_path", externalSd).apply();
@@ -154,14 +154,17 @@ public class Preferences extends Activity {
         }
 
         public boolean isAllowedApp(ApplicationInfo appInfo) {
-            boolean isAllowedApp = true;
             boolean includeSystemApps = prefs.getBoolean("include_system_apps",
                     false);
             if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
                     && !includeSystemApps) {
-                isAllowedApp = false;
+                return false;
             }
-            return isAllowedApp;
+
+            if (Arrays.asList(MTP_APPS).contains(appInfo.packageName)) {
+                return false;
+            }
+            return true;
         }
 
         public class LoadApps extends AsyncTask<Void, Void, Void> {

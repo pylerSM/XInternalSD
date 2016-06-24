@@ -9,6 +9,7 @@ import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -23,6 +24,12 @@ import de.robv.android.xposed.callbacks.XC_LoadPackage.LoadPackageParam;
 
 public class XInternalSD implements IXposedHookZygoteInit,
         IXposedHookLoadPackage {
+    public static final String[] MTP_APPS = {"com.android.MtpApplication", "com.samsung.android.MtpApplication"};
+    private static final String TAG_PERMISSIONS = "perms";
+    private static final String TAG_ITEM = "item";
+    private static final String ATTR_NAME = "name";
+    private static final String ATTR_GRANTED = "granted";
+    private static final String ATTR_FLAGS = "flags";
     public XSharedPreferences prefs;
     public String internalSd;
     public XC_MethodHook getExternalStorageDirectoryHook;
@@ -32,15 +39,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
     public XC_MethodHook getExternalFilesDirsHook;
     public XC_MethodHook getObbDirsHook;
     public XC_MethodHook externalSdCardAccessHook;
-    boolean detectedSdPath = false;
-
-    private static final String TAG_PERMISSIONS = "perms";
-    private static final String TAG_ITEM = "item";
-    private static final String ATTR_NAME = "name";
-    private static final String ATTR_GRANTED = "granted";
-    private static final String ATTR_FLAGS = "flags";
-    public String packageName = null;
+    public String packageName;
     public ArrayList<String> addedPermissions = new ArrayList<String>();
+    boolean detectedSdPath = false;
 
     @Override
     public void initZygote(StartupParam startupParam) throws Throwable {
@@ -165,7 +166,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
                 File internalSdPath = Environment.getExternalStorageDirectory();
                 internalSd = internalSdPath.getPath();
                 detectedSdPath = true;
-            } catch (NullPointerException npe) {
+            } catch (Exception e) {
                 // nothing
             }
         }
@@ -217,24 +218,24 @@ public class XInternalSD implements IXposedHookZygoteInit,
                     ArrayList<String> requestedPermissions = (ArrayList<String>) XposedHelpers.getObjectField(param.args[0], "requestedPermissions");
 
                     if (!requestedPermissions.contains("android.permission.WRITE_MEDIA_STORAGE")) {
-                        Object bp = (Object) XposedHelpers.callMethod(mPermissions, "get", "android.permission.WRITE_MEDIA_STORAGE");
+                        Object bp = XposedHelpers.callMethod(mPermissions, "get", "android.permission.WRITE_MEDIA_STORAGE");
                         if (bp != null) {
-                            final Object ps = (Object) XposedHelpers.getObjectField(param.args[0], "mExtras");
+                            final Object ps = XposedHelpers.getObjectField(param.args[0], "mExtras");
                             Object permissionsState = XposedHelpers.callMethod(ps, "getPermissionsState");
                             Object origPermissions = permissionsState;
-                            Object UserManagerService = (Object) XposedHelpers.callStaticMethod(usrmngr, "getInstance");
+                            Object UserManagerService = XposedHelpers.callStaticMethod(usrmngr, "getInstance");
                             int[] getUserIds = (int[]) XposedHelpers.callMethod(UserManagerService, "getUserIds");
                             for (int userId : getUserIds) {
                                 String namep = (String) XposedHelpers.getObjectField(bp, "name");
-                                Object permstate = (Object) XposedHelpers.callMethod(origPermissions, "getRuntimePermissionState", namep, userId);
+                                Object permstate = XposedHelpers.callMethod(origPermissions, "getRuntimePermissionState", namep, userId);
                                 if (permstate != null) {
                                     XposedHelpers.callMethod(origPermissions, "revokeRuntimePermission", bp, userId);
-                                    int MASK_PERMISSION_FLAGS = (int) XposedHelpers.getStaticIntField(pmngr, "MASK_PERMISSION_FLAGS");
+                                    int MASK_PERMISSION_FLAGS = XposedHelpers.getStaticIntField(pmngr, "MASK_PERMISSION_FLAGS");
                                     XposedHelpers.callMethod(origPermissions, "updatePermissionFlags", bp, userId, MASK_PERMISSION_FLAGS, 0);
                                 }
                             }
                             int grantInstallPermission = (int) XposedHelpers.callMethod(permissionsState, "grantInstallPermission", bp);
-                            int PERMISSION_OPERATION_FAILURE = (int) XposedHelpers.getStaticIntField(pmste, "PERMISSION_OPERATION_FAILURE");
+                            int PERMISSION_OPERATION_FAILURE = XposedHelpers.getStaticIntField(pmste, "PERMISSION_OPERATION_FAILURE");
                             if (grantInstallPermission != PERMISSION_OPERATION_FAILURE) {
                             }
                             String pName = (String) XposedHelpers.getObjectField(bp, "name");
@@ -398,6 +399,9 @@ public class XInternalSD implements IXposedHookZygoteInit,
         } else {
             if ((appInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
                     && !includeSystemApps) {
+                return false;
+            }
+            if (Arrays.asList(MTP_APPS).contains(appInfo.packageName)) {
                 return false;
             }
         }
