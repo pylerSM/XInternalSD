@@ -98,7 +98,7 @@ public class XInternalSD implements IXposedHookZygoteInit,
                 if (!externalSdCardFullAccess) {
                     return;
                 }
-                if (Common.PERM_WRITE_MEDIA_STORAGE
+                if (Common.PERM_WRITE_EXTERNAL_STORAGE
                         .equals(permission)
                         || Common.PERM_ACCESS_ALL_EXTERNAL_STORAGE
                         .equals(permission)) {
