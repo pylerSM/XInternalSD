@@ -1,0 +1,15 @@
+<resources>
+
+    <string name="app_description">Modifica il percorso della scheda SD</string>
+    <string name="app_settings">Impostazioni</string>
+    <string name="custom_internal_sdcard_path">Percorso personalizzato della scheda SD</string>
+    <string name="internal_sdcard_path">Percorso della scheda SD</string>
+    <string name="enable_for_apps">Abilita applicazioni</string>
+    <string name="enable_for_all_apps">Abilita per tutte le applicazioni</string>
+    <string name="disable_for_apps">Disabilita applicazioni</string>
+    <string name="enter_internal_sdcard_path">Immettere il percorso della scheda SD</string>
+    <string name="external_sdcard_full_access">Accesso completo alla scheda SD</string>
+    <string name="include_system_apps">Includi le applicazioni di sistema</string>
+    <string name="reboot_required">Necessario il riavvio del dispositivo per rendere permanenti le modifiche.</string>
+
+</resources>
