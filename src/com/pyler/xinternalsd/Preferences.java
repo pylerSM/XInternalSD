@@ -103,6 +103,9 @@ public class Preferences extends Activity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     File[] dirs = context.getExternalMediaDirs();
                     for (File dir : dirs) {
+                        if (dir == null || !dir.exists()){
+                            continue;
+                        }
                         if (Environment.isExternalStorageRemovable(dir)) {
                             String absolutePath = dir.getAbsolutePath();
                             int end = absolutePath.indexOf("/Android/");
