@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_description">Vertauscht Pfad zu interner SD Karte</string>
+    <string name="app_settings">Einstellungen</string>
+    <string name="custom_internal_sdcard_path">Verweise Pfad auf interne SD Karte</string>
+    <string name="internal_sdcard_path">Mein Pfad zur internen SD Karte</string>
+    <string name="enable_for_apps">Aktivierung für Apps</string>
+    <string name="enable_for_all_apps">Aktivierung für alle Apps</string>
+    <string name="disable_for_apps">Deaktivierung für Apps</string>
+    <string name="enter_internal_sdcard_path">Wähle Pfad zur internen SD Karte</string>
+    <string name="external_sdcard_full_access">Voller Zugriff auf externe SD Karte</string>
+    <string name="include_system_apps">Einschließlich System Apps</string>
+    <string name="reboot_required">Geräte Neustart ist erforderlich damit die Veränderungen wirksam werden.</string>
+</resources>

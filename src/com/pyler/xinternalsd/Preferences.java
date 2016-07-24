@@ -103,7 +103,7 @@ public class Preferences extends Activity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     File[] dirs = context.getExternalMediaDirs();
                     for (File dir : dirs) {
-                        if (dir == null || !dir.exists()){
+                        if (dir == null || !dir.exists()) {
                             continue;
                         }
                         if (Environment.isExternalStorageRemovable(dir)) {
@@ -165,8 +165,8 @@ public class Preferences extends Activity {
         public class LoadApps extends AsyncTask<Void, Void, Void> {
             MultiSelectListPreference enabledApps = (MultiSelectListPreference) findPreference("enable_for_apps");
             MultiSelectListPreference disabledApps = (MultiSelectListPreference) findPreference("disable_for_apps");
-            List<CharSequence> appNames = new ArrayList<CharSequence>();
-            List<CharSequence> packageNames = new ArrayList<CharSequence>();
+            List<CharSequence> appNames = new ArrayList<>();
+            List<CharSequence> packageNames = new ArrayList<>();
             PackageManager pm = context.getPackageManager();
             List<ApplicationInfo> packages = pm
                     .getInstalledApplications(PackageManager.GET_META_DATA);
@@ -179,13 +179,13 @@ public class Preferences extends Activity {
 
             @Override
             protected Void doInBackground(Void... arg0) {
-                List<String[]> sortedApps = new ArrayList<String[]>();
+                List<String[]> sortedApps = new ArrayList<>();
 
                 for (ApplicationInfo app : packages) {
                     if (isAllowedApp(app)) {
                         sortedApps.add(new String[]{
                                 app.packageName,
-                                app.loadLabel(context.getPackageManager())
+                                app.loadLabel(pm)
                                         .toString()});
                     }
                 }
