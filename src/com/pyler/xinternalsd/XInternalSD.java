@@ -7,6 +7,7 @@ import android.os.Environment;
 import org.xmlpull.v1.XmlPullParser;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -273,27 +274,38 @@ public class XInternalSD implements IXposedHookZygoteInit,
     }
 
     public void changeDirsPath(MethodHookParam param) {
-        File[] dirPaths = (File[]) param.getResult();
+        File[] oldDirPaths = (File[]) param.getResult();
+        ArrayList<File> newDirPaths = new ArrayList<File>();
+        for (File oldDirPath : oldDirPaths) {
+            if (oldDirPath != null) {
+                newDirPaths.add(oldDirPath);
+            }
+        }
+
         String customInternalSd = getCustomInternalSd();
         if (customInternalSd.isEmpty()) {
             return;
         }
+
         String internalSd = getInternalSd();
         if (internalSd.isEmpty()) {
             return;
         }
 
-        String dir = Common.appendFileSeparator(dirPaths[0].getPath());
-        String newDir = dir.replaceFirst(internalSd,
-                customInternalSd);
+        String dir = Common.appendFileSeparator(oldDirPaths[0].getPath());
+        String newDir = dir.replaceFirst(internalSd, customInternalSd);
         File newDirPath = new File(newDir);
 
+        if (!newDirPaths.contains(newDirPath)) {
+            newDirPaths.add(newDirPath);
+        }
         if (!newDirPath.exists()) {
             newDirPath.mkdirs();
         }
 
-        dirPaths[0] = newDirPath;
-        param.setResult(dirPaths);
+        File[] appendedDirPaths = newDirPaths.toArray(new File[newDirPaths
+                .size()]);
+        param.setResult(appendedDirPaths);
     }
 
     public String getCustomInternalSd() {
