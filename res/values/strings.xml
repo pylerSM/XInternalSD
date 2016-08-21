@@ -12,5 +12,6 @@
     <string name="external_sdcard_full_access">Full access to external SD card</string>
     <string name="include_system_apps">Include system apps</string>
     <string name="reboot_required">Device reboot is required for changes to take effect.</string>
+    <string name="show_app_icon">Show app icon</string>
 
 </resources>

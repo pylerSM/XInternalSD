@@ -1,6 +1,7 @@
 package com.pyler.xinternalsd;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
@@ -15,6 +16,7 @@ import android.preference.Preference;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import java.io.File;
@@ -130,6 +132,22 @@ public class Preferences extends Activity {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
                 appSettings.removePreference(externalSdCardFullAccess);
             }
+
+            Preference showAppIcon = findPreference("show_app_icon");
+            showAppIcon.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(
+                        Preference preference, Object newValue) {
+                    PackageManager packageManager = context.getPackageManager();
+                    int state = (boolean) newValue ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+                            : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+                    String settings = BuildConfig.APPLICATION_ID + ".Settings";
+                    ComponentName alias = new ComponentName(context, settings);
+                    packageManager.setComponentEnabledSetting(alias, state,
+                            PackageManager.DONT_KILL_APP);
+                    return true;
+                }
+            });
         }
 
         @Override
@@ -198,7 +216,7 @@ public class Preferences extends Activity {
                 });
 
                 for (int i = 0; i < sortedApps.size(); i++) {
-                    appNames.add(sortedApps.get(i)[1]);
+                    appNames.add(sortedApps.get(i)[1] + "\n" + "(" + sortedApps.get(i)[0] + ")");
                     packageNames.add(sortedApps.get(i)[0]);
                 }
 
@@ -218,6 +236,17 @@ public class Preferences extends Activity {
                 disabledApps.setEntries(appNamesList);
                 disabledApps.setEntryValues(packageNamesList);
                 disabledApps.setEnabled(true);
+
+                Preference.OnPreferenceClickListener listener = new Preference.OnPreferenceClickListener() {
+                    @Override
+                    public boolean onPreferenceClick(Preference preference) {
+                        ((MultiSelectListPreference) preference).getDialog().getWindow().setLayout(WindowManager.LayoutParams.FILL_PARENT, WindowManager.LayoutParams.FILL_PARENT);
+                        return false;
+                    }
+                };
+
+                enabledApps.setOnPreferenceClickListener(listener);
+                disabledApps.setOnPreferenceClickListener(listener);
             }
         }
 

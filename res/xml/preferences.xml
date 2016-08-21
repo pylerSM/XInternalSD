@@ -34,6 +34,11 @@
             android:defaultValue="true"
             android:key="external_sdcard_full_access"
             android:title="@string/external_sdcard_full_access" />
+
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="show_app_icon"
+            android:title="@string/show_app_icon" />
     </PreferenceCategory>
 
 </PreferenceScreen>
