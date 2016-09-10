@@ -1,6 +1,5 @@
 <resources>
 
-    <string name="app_name" translatable="false">XInternalSD</string>
     <string name="app_description">Modifica il percorso della scheda SD</string>
     <string name="app_settings">Impostazioni</string>
     <string name="custom_internal_sdcard_path">Percorso personalizzato della scheda SD</string>
