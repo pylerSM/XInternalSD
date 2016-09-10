@@ -1,0 +1,16 @@
+<resources>
+
+    <string name="app_description">تغییر مسیر و ایجاد دسترسی روی کارت حافظه</string>
+    <string name="app_settings">تنظیمات</string>
+    <string name="custom_internal_sdcard_path">ایجاد دسترسی روی کارت حافظه</string>
+    <string name="internal_sdcard_path">مسیر کارت حافظه</string>
+    <string name="enable_for_apps">قابلیت فعال برای برنامه ها انتخابی</string>
+    <string name="enable_for_all_apps">قابلیت فعال برای همه برنامه ها</string>
+    <string name="disable_for_apps">قابلیت غیرفعال برای برنامه ها انتخابی</string>
+    <string name="enter_internal_sdcard_path">مسیر برای کارت حافظه داخلی وارد کنید</string>
+    <string name="external_sdcard_full_access">دسترسی کامل به کارت حافظه خارجی</string>
+    <string name="include_system_apps">شامل برنامه ها سیستمی و تغییر حافظه</string>
+    <string name="reboot_required">دستگاه برای ایجاد تغییرات نیاز به راه اندازی مجدد دارد</string>
+    <string name="show_app_icon"> نمایش آیکون برنامه</string>
+
+</resources>

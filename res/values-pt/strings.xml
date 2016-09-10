@@ -1,6 +1,5 @@
 <resources>
 
-    <string name="app_name" translatable="false">XInternalSD</string>
     <string name="app_description">Mudar caminho para memória interna</string>
     <string name="app_settings">Configurações</string>
     <string name="custom_internal_sdcard_path">Camin. custom. para memória interna</string>

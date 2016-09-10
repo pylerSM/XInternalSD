@@ -11,5 +11,6 @@
     <string name="external_sdcard_full_access">对外置储存卡的完整权限</string>
     <string name="include_system_apps">包含系统应用</string>
     <string name="reboot_required">需要重启设备才能生效</string>
+    <string name="show_app_icon">显示应用程序图标</string>
 
 </resources>

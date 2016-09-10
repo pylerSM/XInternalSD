@@ -11,5 +11,6 @@
     <string name="external_sdcard_full_access">Teljes hozzáférés a Külső SD kártyán</string>
     <string name="include_system_apps">Tartalmazza a rendszer alkalmazásokat</string>
     <string name="reboot_required"> Készülék újraindítása szükséges a változtatások életbe léptetéséhez.</string>
+    <string name="show_app_icon">Mutatása alkalmazás ikonja</string>
 
 </resources>

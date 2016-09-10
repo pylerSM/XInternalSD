@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_description">Verander het pad van uw interne SD kaart.</string>
+    <string name="app_settings">Instellingen</string>
+    <string name="custom_internal_sdcard_path">Aangepast pad voor uw interne SD kaart</string>
+    <string name="internal_sdcard_path">Pad voor uw interne SD kaart</string>
+    <string name="enable_for_apps">Inschakelen voor applicaties</string>
+    <string name="enable_for_all_apps">Inschakelen voor alle applicaties</string>
+    <string name="disable_for_apps">Uitschakelen voor applicaties</string>
+    <string name="enter_internal_sdcard_path">Vul het pad van uw interne SD kaart in.</string>
+    <string name="external_sdcard_full_access">Volledige toegang tot uw externe SD kaart</string>
+    <string name="include_system_apps">Systeem applicaties inclusief</string>
+    <string name="reboot_required">Een herstart van uw mobiele apparaat is nodig om de veranderingen door te voeren.</string>
+    <string name="show_app_icon">Applicatie icoon weergeven</string>
+</resources>

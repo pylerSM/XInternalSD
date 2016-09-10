@@ -11,4 +11,5 @@
     <string name="external_sdcard_full_access">Voller Zugriff auf externe SD Karte</string>
     <string name="include_system_apps">Einschließlich System Apps</string>
     <string name="reboot_required">Geräte Neustart ist erforderlich damit die Veränderungen wirksam werden.</string>
+    <string name="show_app_icon">Zeige App Symbol</string>
 </resources>

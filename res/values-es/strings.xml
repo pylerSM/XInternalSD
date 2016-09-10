@@ -11,5 +11,6 @@
     <string name="external_sdcard_full_access">Acceso completo a la tarjeta SD externa</string>
     <string name="include_system_apps">Mostrar apps del sistema</string>
     <string name="reboot_required">Reinicio del dispositivo es necesario para que los cambios surtan efecto.</string>
+    <string name="show_app_icon">Mostrar icono de la aplicación</string>
 
 </resources>

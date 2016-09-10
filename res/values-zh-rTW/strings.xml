@@ -11,5 +11,6 @@
     <string name="external_sdcard_full_access">取得外置SD卡完整讀寫權限</string>
     <string name="include_system_apps">包含系統應用程式</string>
     <string name="reboot_required">設備重啟需要更改生效</string>
+    <string name="show_app_icon">顯示應用程序圖標</string>
 
 </resources>

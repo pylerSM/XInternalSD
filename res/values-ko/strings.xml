@@ -11,5 +11,6 @@
     <string name="external_sdcard_full_access">외부 스토리지 접근 권한 활성화</string>
     <string name="include_system_apps">시스템 앱 포함</string>
     <string name="reboot_required">변경 사항을 적용하려면 장치 재부팅이 필요합니다.</string>
+    <string name="show_app_icon"> 보기 응용 프로그램 아이콘</string>
 
 </resources>

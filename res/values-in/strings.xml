@@ -11,5 +11,6 @@
     <string name="external_sdcard_full_access">Akses penuh ke kartu SD eksternal</string>
     <string name="include_system_apps">Termasuk aplikasi sistem</string>
     <string name="reboot_required">Diperlukan reboot perangkat untuk menerapkan perubahan.</string>
+    <string name="show_app_icon">Tampilkan ikon aplikasi</string>
 
 </resources>
