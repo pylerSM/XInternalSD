@@ -1,17 +1,17 @@
 <resources>
 
     <string name="app_name" translatable="false">XInternalSD</string>
-    <string name="app_description">Mudar caminho para memória interna</string>
-    <string name="app_settings">Configurações</string>
-    <string name="custom_internal_sdcard_path">Camin. custom. para memória interna</string>
-    <string name="internal_sdcard_path">Caminho para memória interna</string>
-    <string name="enable_for_apps">Ativar para os seguintes apps</string>
-    <string name="enable_for_all_apps">Ativar para todos apps</string>
-    <string name="disable_for_apps">Desativar para os seguintes apps</string>
-    <string name="enter_internal_sdcard_path">Entre com o caminho para a memória interna</string>
-    <string name="external_sdcard_full_access">Acesso completo ao cartão sd</string>
-    <string name="include_system_apps">Incluir apps de sistema</string>
-    <string name="reboot_required">Reiniciar o dispositivo é necessário para as alterações tomarem efeito.</string>
-    <string name="show_app_icon">Mostrar ícone do app</string>
+    <string name="app_description">Change path to internal SD card</string>
+    <string name="app_settings">Settings</string>
+    <string name="custom_internal_sdcard_path">Custom path to internal SD card</string>
+    <string name="internal_sdcard_path">Path to internal SD card</string>
+    <string name="enable_for_apps">Enable for apps</string>
+    <string name="enable_for_all_apps">Enable for all apps</string>
+    <string name="disable_for_apps">Disable for apps</string>
+    <string name="enter_internal_sdcard_path">Enter path to internal SD card</string>
+    <string name="external_sdcard_full_access">Full access to external SD card</string>
+    <string name="include_system_apps">Include system apps</string>
+    <string name="reboot_required">Device reboot is required for changes to take effect.</string>
+    <string name="show_app_icon">Show app icon</string>
 
 </resources>
